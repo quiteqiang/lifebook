@@ -1,0 +1,138 @@
+"use client";
+import { useEffect, useRef, useState } from 'react';
+import { Renderer, Program, Mesh, Triangle, Vec3 } from 'ogl';
+import { cn } from '@/lib/utils';
+import { openMicrophone } from '@/lib/microphone';
+import { vert, frag } from './orb-shaders';
+
+interface VoicePoweredOrbProps {
+  className?: string;
+  hue?: number;
+  enableVoiceControl?: boolean;
+  voiceSensitivity?: number;
+  maxRotationSpeed?: number;
+  maxHoverIntensity?: number;
+  onVoiceDetected?: (detected: boolean) => void;
+  onMicrophoneState?: (state: 'ready' | 'error') => void;
+  onMicrophoneStream?: (stream: MediaStream | null) => void;
+}
+
+export function VoicePoweredOrb({className, hue = 0, enableVoiceControl = true,
+  voiceSensitivity = 1.5, maxRotationSpeed = 1.2, maxHoverIntensity = 0.8,
+  onVoiceDetected, onMicrophoneState, onMicrophoneStream}: VoicePoweredOrbProps) {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const audioRef = useRef<{ analyser: AnalyserNode; data: Uint8Array<ArrayBuffer> } | null>(null);
+  const options = useRef({hue, voiceSensitivity, maxRotationSpeed, maxHoverIntensity, onVoiceDetected, onMicrophoneState});
+  options.current = {hue, voiceSensitivity, maxRotationSpeed, maxHoverIntensity, onVoiceDetected, onMicrophoneState};
+  const [fallback, setFallback] = useState(false);
+
+  useEffect(() => {
+    if (!enableVoiceControl) return;
+    const controller = new AbortController();
+    let context: AudioContext | undefined;
+    let source: MediaStreamAudioSourceNode | undefined;
+    const start = async () => {
+      try {
+        const stream = await openMicrophone(controller.signal);
+        if (!stream) return;
+        context = new AudioContext();
+        await context.resume();
+        if (controller.signal.aborted) return;
+        const analyser = context.createAnalyser();
+        analyser.fftSize = 512;
+        analyser.smoothingTimeConstant = 0.3;
+        analyser.minDecibels = -90;
+        analyser.maxDecibels = -10;
+        source = context.createMediaStreamSource(stream);
+        source.connect(analyser);
+        audioRef.current = {analyser, data: new Uint8Array(analyser.frequencyBinCount)};
+        options.current.onMicrophoneState?.('ready');
+        onMicrophoneStream?.(stream);
+      } catch {
+        if (!controller.signal.aborted) {
+          controller.abort();
+          source?.disconnect();
+          if (context && context.state !== 'closed') void context.close().catch(() => {});
+          options.current.onMicrophoneState?.('error');
+        }
+      }
+    };
+    void start();
+    return () => {
+      controller.abort();
+      audioRef.current = null;
+      onMicrophoneStream?.(null);
+      source?.disconnect();
+      if (context && context.state !== 'closed') void context.close().catch(() => {});
+      options.current.onVoiceDetected?.(false);
+    };
+  }, [enableVoiceControl]);
+
+  useEffect(() => {
+    const container = containerRef.current;
+    if (!container) return;
+    let renderer: Renderer;
+    try { renderer = new Renderer({alpha: true, premultipliedAlpha: true, antialias: true, dpr: Math.min(devicePixelRatio || 1, 2)}); }
+    catch { setFallback(true); return; }
+    const gl = renderer.gl;
+    gl.clearColor(0, 0, 0, 0);
+    const canvas = gl.canvas as HTMLCanvasElement;
+    canvas.setAttribute('aria-hidden', 'true');
+    container.appendChild(canvas);
+    const geometry = new Triangle(gl);
+    const program = new Program(gl, {vertex: vert, fragment: frag, uniforms: {
+      iTime: {value: 0}, iResolution: {value: new Vec3()}, hue: {value: options.current.hue},
+      hover: {value: 0}, rot: {value: 0}, hoverIntensity: {value: 0},
+    }});
+    const mesh = new Mesh(gl, {geometry, program});
+    const resize = () => {
+      renderer.setSize(container.clientWidth, container.clientHeight);
+      program.uniforms.iResolution.value.set(canvas.width, canvas.height, canvas.width / canvas.height);
+    };
+    const observer = new ResizeObserver(resize);
+    observer.observe(container);
+    resize();
+    const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)');
+    let frame = 0, lastTime = 0, time = 0, rotation = 0, detected = false;
+    const update = (now: number) => {
+      frame = requestAnimationFrame(update);
+      const dt = lastTime ? Math.min((now - lastTime) / 1000, 0.05) : 0;
+      lastTime = now;
+      if (document.hidden) return;
+      const settings = options.current;
+      const audio = audioRef.current;
+      let level = 0;
+      if (audio) {
+        audio.analyser.getByteFrequencyData(audio.data);
+        let sum = 0;
+        for (const value of audio.data) sum += (value / 255) ** 2;
+        level = Math.min(Math.sqrt(sum / audio.data.length) * settings.voiceSensitivity * 3, 1);
+      }
+      const nextDetected = level > 0.1;
+      if (nextDetected !== detected) { detected = nextDetected; settings.onVoiceDetected?.(detected); }
+      if (!reducedMotion.matches) {
+        time += dt;
+        if (level > 0.05) rotation += dt * (0.3 + level * settings.maxRotationSpeed * 2);
+      }
+      program.uniforms.iTime.value = time;
+      program.uniforms.rot.value = rotation;
+      program.uniforms.hue.value = settings.hue;
+      program.uniforms.hover.value = reducedMotion.matches ? 0 : Math.min(level * 2, 1);
+      program.uniforms.hoverIntensity.value = Math.min(level * settings.maxHoverIntensity * 0.8, settings.maxHoverIntensity);
+      renderer.render({scene: mesh});
+    };
+    frame = requestAnimationFrame(update);
+    const onContextLost = (event: Event) => {event.preventDefault(); cancelAnimationFrame(frame); setFallback(true);};
+    canvas.addEventListener('webglcontextlost', onContextLost);
+    return () => {
+      cancelAnimationFrame(frame);
+      observer.disconnect();
+      canvas.removeEventListener('webglcontextlost', onContextLost);
+      geometry.remove();
+      program.remove();
+      canvas.remove();
+      gl.getExtension('WEBGL_lose_context')?.loseContext();
+    };
+  }, []);
+  return <div ref={containerRef} className={cn('voice-orb relative h-full w-full', fallback && 'orb-fallback', className)} role="img" aria-label="Animated voice orb" />;
+}
