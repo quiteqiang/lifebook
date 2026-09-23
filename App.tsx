@@ -1,7 +1,8 @@
 import { useEffect, useRef, useState } from 'react';
-import { BookOpen, Home, Mic, Square, X } from 'lucide-react';
+import { ArrowLeft, BookOpen, Home, Mic, Square, X } from 'lucide-react';
 import { VoicePoweredOrb } from '@/components/ui/voice-powered-orb';
 import { Button } from '@/components/ui/button';
+import { VoiceCollection } from '@/components/ui/voice-collection';
 import { VoiceMixStudio } from '@/components/ui/voice-mix-studio';
 import { readAudio, saveAudio } from '@/lib/audio-store';
 import { createMemoryEntry, type MemoryEntry, readMemoryMetadata, writeMemoryMetadata } from '@/lib/memories';
@@ -17,6 +18,7 @@ function initialMemories(): MemoryEntry[] {
 
 export default function App() {
   const [tab, setTab] = useState<'today' | 'book'>('today');
+  const [bookView, setBookView] = useState<'collection' | 'mixer'>('collection');
   const [phase, setPhase] = useState<Phase>('idle');
   const [ready, setReady] = useState(false);
   const [voice, setVoice] = useState(false);
@@ -142,7 +144,10 @@ export default function App() {
       {tab === 'today' ? <div className={`orb-position ${voice ? 'is-speaking' : ''}`}>
         <VoicePoweredOrb enableVoiceControl={isRecording} onVoiceDetected={level => { setVoice(level); if (level) levelsRef.current.push(0.75); }} onMicrophoneState={state => { if (state === 'ready') setReady(true); else { setPhase('idle'); setError(true); } }} onMicrophoneStream={handleMicrophoneStream} />
       </div> : <div className="mybook-roll-scene">
-        <VoiceMixStudio memories={memories} playingId={playingId} mixing={mixing} onPlay={playMemory} onMix={mixMemories} />
+        {bookView === 'collection' ? <VoiceCollection memories={memories} playingId={playingId} onPlay={playMemory} onOpenMixer={() => setBookView('mixer')} /> : <div className="mybook-mixer-page">
+          <button type="button" className="mixer-back" aria-label="Back to collection" onClick={() => setBookView('collection')}><ArrowLeft size={16} /><span>声音收藏</span></button>
+          <VoiceMixStudio memories={memories} playingId={playingId} mixing={mixing} onPlay={playMemory} onMix={mixMemories} />
+        </div>}
       </div>}
       {tab === 'today' && <div className="record-position">
         <Button className={`record-button ${isRecording ? 'is-recording' : ''} ${isRecording && !ready ? 'is-pending' : ''}`} size="icon"
@@ -156,7 +161,7 @@ export default function App() {
     {error && <div className="error-message" role="alert"><span>Microphone or playback unavailable. Check browser permissions and try again.</span><button aria-label="Dismiss message" onClick={() => setError(false)}><X size={18}/></button></div>}
     <nav className="bottom-nav" aria-label="Main navigation">
       <button aria-current={tab === 'today' ? 'page' : undefined} onClick={() => setTab('today')}><Home strokeWidth={1.7}/><span>Today</span></button>
-      <button aria-current={tab === 'book' ? 'page' : undefined} onClick={() => { if (isRecording) endRecording(); setError(false); setTab('book'); }}><BookOpen strokeWidth={1.5}/><span>MyBook</span></button>
+      <button aria-current={tab === 'book' ? 'page' : undefined} onClick={() => { if (isRecording) endRecording(); setError(false); setBookView('collection'); setTab('book'); }}><BookOpen strokeWidth={1.5}/><span>MyBook</span></button>
     </nav>
     <div className="home-indicator" aria-hidden="true" />
   </main>;
