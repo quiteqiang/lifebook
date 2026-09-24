@@ -6,13 +6,14 @@ body {margin:0;}
 button {cursor:pointer; -webkit-tap-highlight-color:transparent;}
 button:focus-visible {outline:2px solid #557862; outline-offset:5px;}
 .app-shell {position:relative; isolation:isolate; width:100%; max-width:480px; height:100svh; min-height:540px; margin:auto; overflow:hidden; background:#faf9f5;}
-.app-shell.is-library { background:#050507; }
+.app-shell.is-library { background:linear-gradient(180deg,#050507 0%,#07090e 16%,#11151f 35%,#0c0f17 58%,#050507 100%); }
 .brand {position:absolute; top:max(48px, env(safe-area-inset-top)); left:29px; display:flex; align-items:center; gap:12px; z-index:2;}
 .brand svg {width:34px; height:34px; color:#365d46;}
 .brand span {font-size:23px; font-weight:450; letter-spacing:-.65px;}
 .app-shell.is-library .brand { color:#f1eee8; }
 .app-shell.is-library .brand svg { color:#d4af37; }
 .main-stage {position:absolute; inset:105px 0 165px;}
+.app-shell.is-library .main-stage { top:60px; }
 .orb-position {position:absolute; width:100%; aspect-ratio:1; max-width:420px; left:50%; top:37%; transform:translate(-50%,-50%); transition:filter .5s;}
 .voice-orb {filter: hue-rotate(0deg);}
 .voice-orb canvas {display:block; width:100%; height:100%;}
@@ -307,8 +308,9 @@ button:focus-visible {outline:2px solid #557862; outline-offset:5px;}
 
 /* Memory Archive library: a quiet, tactile shelf for the second tab. */
 .library-scene { background:#050507; color:#f5f1e8; }
-.library-page { position:relative; min-height:100%; overflow:hidden; padding:14px 22px 12px; background:linear-gradient(180deg,#050507 0,#090a10 42px,#12141e 102px,transparent 165px),radial-gradient(circle at 50% 12%,#1a1c28 0%,#0b0c11 52%,#050507 100%); color:#f5f1e8; }
+.library-page { position:relative; min-height:100%; overflow:hidden; padding:59px 22px 12px; background:linear-gradient(180deg,#050507 0%,#080a10 34px,#10141f 104px,#151a28 174px,transparent 250px),radial-gradient(circle at 50% 12%,#1a1c28 0%,#0b0c11 52%,#050507 100%); color:#f5f1e8; }
 .library-page::before { content:""; position:absolute; inset:0; pointer-events:none; opacity:.2; background:radial-gradient(circle at 18% 72%,rgba(212,175,55,.14),transparent 28%),radial-gradient(circle at 78% 24%,rgba(92,138,157,.12),transparent 25%); }
+.library-page::after { content:""; position:absolute; z-index:0; top:0; left:0; right:0; height:280px; pointer-events:none; background:linear-gradient(180deg,#050507 0%,rgba(5,5,7,.9) 18%,rgba(7,10,16,.55) 48%,rgba(10,13,21,.12) 73%,transparent 100%); }
 .library-header { position:relative; z-index:1; display:flex; justify-content:flex-end; align-items:flex-start; }
 .library-portal-header span { display:block; color:#e6c687; font-size:9px; letter-spacing:.24em; }
 .library-header > svg { margin-top:3px; color:#d4af37; }
@@ -372,4 +374,4 @@ button:focus-visible {outline:2px solid #557862; outline-offset:5px;}
 .library-portal-actions { display:flex; gap:12px; }
 .library-portal-actions button { display:flex; align-items:center; justify-content:center; gap:7px; min-width:132px; padding:11px 13px; border:1px solid #d4af3770; border-radius:4px; color:#efdfb5; background:#17151b; font-size:10px; letter-spacing:.08em; cursor:pointer; }
 .library-portal-actions button:last-child { color:#15110b; background:#d5af59; border-color:#f0d58d; }
-@media(max-height:680px) { .library-page { padding-top:10px; } .library-bookshelf { height:300px; margin-top:8px; } .library-book { height:180px; } .library-book-position-2 { height:205px; } .library-book-position-3 { height:230px; } .library-real-book { height:350px; } }
+@media(max-height:680px) { .library-page { padding-top:55px; } .library-bookshelf { height:300px; margin-top:8px; } .library-book { height:180px; } .library-book-position-2 { height:205px; } .library-book-position-3 { height:230px; } .library-real-book { height:350px; } }
