@@ -29,21 +29,23 @@ describe('Library replacement page', () => {
     expect(screen.queryByRole('dialog')).toBeNull();
   });
 
-  it('scrolls the bookshelf when dragged with a mouse', () => {
+  it('applies coverflow motion and updates the active volume caption while dragging', () => {
     render(<Library />);
     const carousel = screen.getByRole('region', { name: 'Memory volumes' }).querySelector('.library-books-carousel') as HTMLElement;
-    Object.defineProperty(carousel, 'clientWidth', { configurable: true, value: 400 });
-    Object.defineProperty(carousel, 'scrollWidth', { configurable: true, value: 1200 });
-    carousel.scrollLeft = 0;
+    const books = screen.getAllByRole('button', { name: /2026/ });
+    const initialTransform = books[1].getAttribute('style');
 
-    fireEvent.mouseDown(carousel, { clientX: 300 });
-    fireEvent.mouseMove(carousel, { clientX: 220 });
+    const down = new Event('pointerdown', { bubbles: true });
+    Object.defineProperty(down, 'clientX', { value: 300 });
+    Object.defineProperty(down, 'pointerId', { value: 7 });
+    const move = new Event('pointermove', { bubbles: true });
+    Object.defineProperty(move, 'clientX', { value: 190 });
+    Object.defineProperty(move, 'pointerId', { value: 7 });
+    fireEvent(carousel, down);
+    fireEvent(carousel, move);
 
-    expect(carousel.scrollLeft).toBe(80);
-    expect(carousel.classList.contains('is-dragging')).toBe(true);
-
-    fireEvent.mouseUp(carousel, { clientX: 220 });
-    expect(carousel.scrollLeft).toBe(400);
-    expect(carousel.classList.contains('is-dragging')).toBe(false);
+    expect(books[1].getAttribute('style')).not.toBe(initialTransform);
+    expect(books[1].getAttribute('style')).toContain('translateX');
+    expect(screen.getByTestId('library-active-volume').textContent).toContain('March 2026');
   });
 });
