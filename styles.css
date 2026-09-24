@@ -315,8 +315,9 @@ button:focus-visible {outline:2px solid #557862; outline-offset:5px;}
 .library-bookshelf { position:relative; z-index:1; height:300px; display:flex; align-items:flex-end; justify-content:center; margin-top:8px; perspective:1000px; }
 .library-shelf-plank { position:absolute; left:-12%; right:-12%; bottom:15px; height:18px; border-top:1px solid #d4af3760; background:linear-gradient(#3b3e46,#101116); box-shadow:0 25px 40px #000c; }
 .library-shelf-plank::after { content:""; position:absolute; inset:5px 0 auto; height:1px; background:#e4c97830; }
-.library-books-carousel { display:flex; width:100%; overflow-x:auto; padding:0 0 28px; scroll-snap-type:x mandatory; scrollbar-width:none; transform:rotateX(14deg) rotateY(-8deg); transform-style:preserve-3d; }
+.library-books-carousel { display:flex; width:100%; overflow-x:auto; padding:0 0 28px; cursor:grab; scroll-snap-type:x proximity; scrollbar-width:none; touch-action:none; transform:rotateX(14deg) rotateY(-8deg); transform-style:preserve-3d; }
 .library-books-carousel::-webkit-scrollbar { display:none; }
+.library-books-carousel.is-dragging { cursor:grabbing; user-select:none; scroll-snap-type:none; }
 .library-book-page { flex:0 0 100%; display:flex; align-items:flex-end; justify-content:center; gap:18px; scroll-snap-align:start; }
 .library-book { position:relative; flex:0 0 76px; width:76px; height:220px; display:flex; flex-direction:column; justify-content:space-between; padding:10px 8px; overflow:visible; border:0; border-radius:4px 7px 6px 3px; color:#eee; cursor:pointer; transform-style:preserve-3d; transition:transform .5s cubic-bezier(.2,.75,.2,1),filter .5s; box-shadow:12px 18px 22px #0009; text-align:left; }
 .library-book-position-2 { flex-basis:82px; width:82px; height:245px; }

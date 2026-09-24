@@ -28,4 +28,22 @@ describe('Library replacement page', () => {
 
     expect(screen.queryByRole('dialog')).toBeNull();
   });
+
+  it('scrolls the bookshelf when dragged with a mouse', () => {
+    render(<Library />);
+    const carousel = screen.getByRole('region', { name: 'Memory volumes' }).querySelector('.library-books-carousel') as HTMLElement;
+    Object.defineProperty(carousel, 'clientWidth', { configurable: true, value: 400 });
+    Object.defineProperty(carousel, 'scrollWidth', { configurable: true, value: 1200 });
+    carousel.scrollLeft = 0;
+
+    fireEvent.mouseDown(carousel, { clientX: 300 });
+    fireEvent.mouseMove(carousel, { clientX: 220 });
+
+    expect(carousel.scrollLeft).toBe(80);
+    expect(carousel.classList.contains('is-dragging')).toBe(true);
+
+    fireEvent.mouseUp(carousel, { clientX: 220 });
+    expect(carousel.scrollLeft).toBe(400);
+    expect(carousel.classList.contains('is-dragging')).toBe(false);
+  });
 });

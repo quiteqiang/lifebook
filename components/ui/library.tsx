@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
+import type { MouseEvent as ReactMouseEvent, PointerEvent as ReactPointerEvent } from 'react';
 import { BookOpen, Play, RotateCcw, X } from 'lucide-react';
 
 type Volume = {
@@ -30,9 +31,90 @@ type LibraryProps = { onReplay?: () => void };
 export function Library({ onReplay }: LibraryProps) {
   const [openVolume, setOpenVolume] = useState<Volume | null>(null);
   const [flipped, setFlipped] = useState(false);
+  const dragRef = useRef<{ startX: number; currentX: number; startScroll: number; pointerId: number } | null>(null);
+  const carouselRef = useRef<HTMLDivElement | null>(null);
 
   const openBook = (volume: Volume) => { setOpenVolume(volume); setFlipped(false); };
   const closeBook = () => { setOpenVolume(null); setFlipped(false); };
+  const beginDrag = (element: HTMLDivElement, clientX: number, pointerId = -1) => {
+    dragRef.current = { startX: clientX, currentX: clientX, startScroll: element.scrollLeft, pointerId };
+    element.classList.add('is-dragging');
+    if (pointerId >= 0) element.setPointerCapture?.(pointerId);
+  };
+  const updateDrag = (element: HTMLDivElement, clientX: number) => {
+    const drag = dragRef.current;
+    if (!drag) return;
+    drag.currentX = clientX;
+    element.scrollLeft = drag.startScroll - (clientX - drag.startX);
+  };
+  const endDrag = (element: HTMLDivElement, pointerId = -1) => {
+    const drag = dragRef.current;
+    if (!drag) return;
+    const delta = drag.startX - drag.currentX;
+    const movedPage = Math.abs(delta) > 48;
+    const targetScroll = movedPage
+      ? drag.startScroll + (delta > 0 ? element.clientWidth : -element.clientWidth)
+      : drag.startScroll;
+    dragRef.current = null;
+    element.classList.remove('is-dragging');
+    if (pointerId >= 0) element.releasePointerCapture?.(pointerId);
+    if (movedPage) {
+      element.scrollLeft = Math.max(0, Math.min(targetScroll, element.scrollWidth - element.clientWidth));
+    }
+  };
+  const handlePointerDown = (event: ReactPointerEvent<HTMLDivElement>) => {
+    beginDrag(event.currentTarget, event.clientX, event.pointerId);
+  };
+  const handlePointerMove = (event: ReactPointerEvent<HTMLDivElement>) => {
+    const drag = dragRef.current;
+    if (!drag) return;
+    event.preventDefault();
+    updateDrag(event.currentTarget, event.clientX);
+  };
+  const handlePointerEnd = (event: ReactPointerEvent<HTMLDivElement>) => {
+    endDrag(event.currentTarget, event.pointerId);
+  };
+  const handleMouseDown = (event: ReactMouseEvent<HTMLDivElement>) => {
+    beginDrag(event.currentTarget, event.clientX);
+  };
+  const handleMouseMove = (event: ReactMouseEvent<HTMLDivElement>) => {
+    if (!dragRef.current) return;
+    event.preventDefault();
+    updateDrag(event.currentTarget, event.clientX);
+  };
+  const handleMouseEnd = (event: ReactMouseEvent<HTMLDivElement>) => {
+    endDrag(event.currentTarget);
+  };
+  useEffect(() => {
+    const handleWindowPointerMove = (event: PointerEvent) => {
+      const element = carouselRef.current;
+      if (!element || !dragRef.current) return;
+      event.preventDefault();
+      updateDrag(element, event.clientX);
+    };
+    const handleWindowMouseMove = (event: MouseEvent) => {
+      const element = carouselRef.current;
+      if (!element || !dragRef.current) return;
+      event.preventDefault();
+      updateDrag(element, event.clientX);
+    };
+    const handleWindowEnd = () => {
+      const element = carouselRef.current;
+      if (element) endDrag(element);
+    };
+    window.addEventListener('pointermove', handleWindowPointerMove, true);
+    window.addEventListener('mousemove', handleWindowMouseMove, true);
+    window.addEventListener('pointerup', handleWindowEnd, true);
+    window.addEventListener('pointercancel', handleWindowEnd, true);
+    window.addEventListener('mouseup', handleWindowEnd, true);
+    return () => {
+      window.removeEventListener('pointermove', handleWindowPointerMove, true);
+      window.removeEventListener('mousemove', handleWindowMouseMove, true);
+      window.removeEventListener('pointerup', handleWindowEnd, true);
+      window.removeEventListener('pointercancel', handleWindowEnd, true);
+      window.removeEventListener('mouseup', handleWindowEnd, true);
+    };
+  }, []);
 
   return <div className="library-page" aria-label="Library">
     <header className="library-header">
@@ -40,7 +122,7 @@ export function Library({ onReplay }: LibraryProps) {
     </header>
     <section className="library-bookshelf" aria-label="Memory volumes">
       <div className="library-shelf-plank" aria-hidden="true" />
-      <div className="library-books library-books-carousel">
+      <div ref={carouselRef} className="library-books library-books-carousel" draggable={false} onDragStart={(event) => event.preventDefault()} onPointerDown={handlePointerDown} onPointerMove={handlePointerMove} onPointerUp={handlePointerEnd} onPointerCancel={handlePointerEnd} onMouseDown={handleMouseDown} onMouseMove={handleMouseMove} onMouseUp={handleMouseEnd}>
         {Array.from({ length: Math.ceil(volumes.length / 3) }, (_, pageIndex) => <div className="library-book-page" key={pageIndex}>
           {volumes.slice(pageIndex * 3, pageIndex * 3 + 3).map((volume, bookIndex) => <button key={volume.id} type="button" className={`library-book library-book-${volume.tone} library-book-position-${bookIndex + 1}`} aria-label={`${volume.month} ${volume.subtitle}`} onClick={() => openBook(volume)}>
             {volume.id === 9 && <span className="library-book-ping" aria-hidden="true" />}
