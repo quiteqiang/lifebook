@@ -307,7 +307,7 @@ button:focus-visible {outline:2px solid #557862; outline-offset:5px;}
 
 /* Memory Archive library: a quiet, tactile shelf for the second tab. */
 .library-scene { background:#050507; color:#f5f1e8; }
-.library-page { position:relative; min-height:100%; overflow:hidden; padding:14px 22px 12px; background:radial-gradient(circle at 50% 12%,#1a1c28 0%,#0b0c11 52%,#050507 100%); color:#f5f1e8; }
+.library-page { position:relative; min-height:100%; overflow:hidden; padding:14px 22px 12px; background:linear-gradient(180deg,#050507 0,#090a10 42px,#12141e 102px,transparent 165px),radial-gradient(circle at 50% 12%,#1a1c28 0%,#0b0c11 52%,#050507 100%); color:#f5f1e8; }
 .library-page::before { content:""; position:absolute; inset:0; pointer-events:none; opacity:.2; background:radial-gradient(circle at 18% 72%,rgba(212,175,55,.14),transparent 28%),radial-gradient(circle at 78% 24%,rgba(92,138,157,.12),transparent 25%); }
 .library-header { position:relative; z-index:1; display:flex; justify-content:flex-end; align-items:flex-start; }
 .library-portal-header span { display:block; color:#e6c687; font-size:9px; letter-spacing:.24em; }
