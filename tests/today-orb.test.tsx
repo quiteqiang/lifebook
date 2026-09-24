@@ -1,6 +1,8 @@
-import { describe, expect, it, vi } from 'vitest';
-import { render, screen } from '@testing-library/react';
+import { afterEach, describe, expect, it, vi } from 'vitest';
+import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import App from '@/App';
+
+afterEach(() => cleanup());
 
 vi.mock('@/components/ui/voice-powered-orb', () => ({
   VoicePoweredOrb: () => <div role="img" aria-label="Animated voice orb" />,
@@ -15,5 +17,10 @@ describe('Today home visual', () => {
     render(<App />);
     expect(screen.getByRole('img', { name: 'Animated voice orb' })).toBeTruthy();
   });
-});
 
+  it('switches the app shell to the Library theme on the second tab', () => {
+    render(<App />);
+    fireEvent.click(screen.getByRole('button', { name: 'Library' }));
+    expect(document.querySelector('.app-shell')?.className).toContain('is-library');
+  });
+});
