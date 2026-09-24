@@ -5,7 +5,7 @@ import { Library } from '@/components/ui/library';
 afterEach(() => cleanup());
 
 describe('Library replacement page', () => {
-  it('shows the three sample volumes and opens a book portal', () => {
+  it('shows twelve monthly volumes and opens a book portal', () => {
     render(<Library />);
 
     expect(screen.queryByRole('heading', { name: 'The Living Shelf' })).toBeNull();
@@ -13,6 +13,7 @@ describe('Library replacement page', () => {
     expect(screen.getAllByRole('button', { name: /2026/ })).toHaveLength(12);
     expect(screen.getByRole('button', { name: /January 2026/ })).toBeTruthy();
     expect(screen.getByRole('button', { name: /December 2026/ })).toBeTruthy();
+    expect(screen.getByRole('region', { name: 'Memory volumes' }).querySelector('.library-books')?.classList.contains('library-books-carousel')).toBe(true);
 
     fireEvent.click(screen.getByRole('button', { name: /September 2026/ }));
 
