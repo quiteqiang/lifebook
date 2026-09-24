@@ -27,7 +27,6 @@ export function Library({ onReplay }: LibraryProps) {
 
   return <div className="library-page" aria-label="Library">
     <header className="library-header">
-      <div><span>MEMORY ARCHIVE</span><h1>The Living Shelf</h1></div>
       <BookOpen size={23} strokeWidth={1.2} aria-hidden="true" />
     </header>
     <section className="library-bookshelf" aria-label="Memory volumes">
@@ -57,4 +56,3 @@ export function Library({ onReplay }: LibraryProps) {
     </div>}
   </div>;
 }
-

@@ -8,7 +8,8 @@ describe('Library replacement page', () => {
   it('shows the three sample volumes and opens a book portal', () => {
     render(<Library />);
 
-    expect(screen.getByRole('heading', { name: 'The Living Shelf' })).toBeTruthy();
+    expect(screen.queryByRole('heading', { name: 'The Living Shelf' })).toBeNull();
+    expect(screen.queryByText('MEMORY ARCHIVE')).toBeNull();
     expect(screen.getByRole('button', { name: /July 2026/ })).toBeTruthy();
     expect(screen.getByRole('button', { name: /August 2026/ })).toBeTruthy();
     expect(screen.getByRole('button', { name: /September 2026/ })).toBeTruthy();
