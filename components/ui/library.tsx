@@ -11,9 +11,18 @@ type Volume = {
 };
 
 const volumes: Volume[] = [
-  { id: 1, month: 'July 2026', subtitle: 'SOLITUDE & RAIN', roman: 'VII', count: '29 REC', tone: 'slate' },
-  { id: 2, month: 'August 2026', subtitle: 'CRIMSON HORIZON', roman: 'VIII', count: '31 REC', tone: 'crimson' },
-  { id: 3, month: 'September 2026', subtitle: 'GOLDEN EQUINOX', roman: 'IX', count: 'IN PROGRESS', tone: 'gold' },
+  { id: 1, month: 'January 2026', subtitle: 'FROST & FIRST LIGHT', roman: 'I', count: '12 REC', tone: 'slate' },
+  { id: 2, month: 'February 2026', subtitle: 'CRIMSON HORIZON', roman: 'II', count: '18 REC', tone: 'crimson' },
+  { id: 3, month: 'March 2026', subtitle: 'GOLDEN EQUINOX', roman: 'III', count: '21 REC', tone: 'gold' },
+  { id: 4, month: 'April 2026', subtitle: 'RAIN ON GLASS', roman: 'IV', count: '16 REC', tone: 'slate' },
+  { id: 5, month: 'May 2026', subtitle: 'SOFT GREEN DAYS', roman: 'V', count: '24 REC', tone: 'crimson' },
+  { id: 6, month: 'June 2026', subtitle: 'WINTER TIDE', roman: 'VI', count: '27 REC', tone: 'gold' },
+  { id: 7, month: 'July 2026', subtitle: 'SOLITUDE & RAIN', roman: 'VII', count: '29 REC', tone: 'slate' },
+  { id: 8, month: 'August 2026', subtitle: 'CRIMSON HORIZON', roman: 'VIII', count: '31 REC', tone: 'crimson' },
+  { id: 9, month: 'September 2026', subtitle: 'GOLDEN EQUINOX', roman: 'IX', count: 'IN PROGRESS', tone: 'gold' },
+  { id: 10, month: 'October 2026', subtitle: 'EMBER LETTERS', roman: 'X', count: '— REC', tone: 'slate' },
+  { id: 11, month: 'November 2026', subtitle: 'QUIET HARVEST', roman: 'XI', count: '— REC', tone: 'crimson' },
+  { id: 12, month: 'December 2026', subtitle: 'THE LONG NIGHT', roman: 'XII', count: '— REC', tone: 'gold' },
 ];
 
 type LibraryProps = { onReplay?: () => void };
@@ -33,7 +42,7 @@ export function Library({ onReplay }: LibraryProps) {
       <div className="library-shelf-plank" aria-hidden="true" />
       <div className="library-books">
         {volumes.map(volume => <button key={volume.id} type="button" className={`library-book library-book-${volume.tone}`} aria-label={`${volume.month} ${volume.subtitle}`} onClick={() => openBook(volume)}>
-          {volume.id === 3 && <span className="library-book-ping" aria-hidden="true" />}
+          {volume.id === 9 && <span className="library-book-ping" aria-hidden="true" />}
           <span className="library-book-top">{volume.roman}</span>
           <span className="library-book-title">{volume.month.replace(' 2026', '')}</span>
           <span className="library-book-count">{volume.count}</span>

@@ -10,9 +10,9 @@ describe('Library replacement page', () => {
 
     expect(screen.queryByRole('heading', { name: 'The Living Shelf' })).toBeNull();
     expect(screen.queryByText('MEMORY ARCHIVE')).toBeNull();
-    expect(screen.getByRole('button', { name: /July 2026/ })).toBeTruthy();
-    expect(screen.getByRole('button', { name: /August 2026/ })).toBeTruthy();
-    expect(screen.getByRole('button', { name: /September 2026/ })).toBeTruthy();
+    expect(screen.getAllByRole('button', { name: /2026/ })).toHaveLength(12);
+    expect(screen.getByRole('button', { name: /January 2026/ })).toBeTruthy();
+    expect(screen.getByRole('button', { name: /December 2026/ })).toBeTruthy();
 
     fireEvent.click(screen.getByRole('button', { name: /September 2026/ }));
 
