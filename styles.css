@@ -340,11 +340,12 @@ button:focus-visible {outline:2px solid #557862; outline-offset:5px;}
 .library-book-title { position:relative; z-index:1; align-self:center; writing-mode:vertical-rl; transform:rotate(180deg); font:500 15px/1 Georgia,serif; letter-spacing:.1em; text-transform:uppercase; }
 .library-book-count { font-size:7px; }
 .library-book-ping { position:absolute; z-index:2; top:-11px; left:50%; width:7px; height:7px; border-radius:50%; background:#e8bd5a; box-shadow:0 0 0 4px #e8bd5a20,0 0 16px #e8bd5a; animation:library-ping 1.8s ease-in-out infinite; }
-.library-volume-caption { position:relative; z-index:1; min-height:75px; margin:8px 0 0; color:#f5f1e8; text-align:center; }
-.library-volume-kicker { display:block; color:#d4af37; font-size:8px; letter-spacing:.2em; }
-.library-volume-caption h2 { margin:5px 0 2px; font:400 20px/1 Georgia,serif; letter-spacing:.04em; }
-.library-volume-caption p { margin:0; color:#9da0ad; font-size:9px; letter-spacing:.16em; }
-.library-volume-meta { display:flex; justify-content:center; gap:16px; margin-top:8px; color:#777b8a; font-size:7px; letter-spacing:.17em; }
+.library-volume-caption { position:relative; z-index:1; width:min(100%,260px); min-height:118px; margin:18px auto 0; color:#f5f1e8; text-align:center; }
+.library-volume-kicker { display:block; color:#d4af37; font-size:8px; line-height:1.4; letter-spacing:.24em; }
+.library-volume-caption h2 { margin:12px 0 0; font:600 22px/1.15 Georgia,serif; letter-spacing:.01em; }
+.library-volume-caption p { margin:8px 0 0; color:#9da0ad; font-size:10px; line-height:1.4; letter-spacing:.18em; }
+.library-volume-meta { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); align-items:center; gap:22px; margin-top:18px; color:#777b8a; font-size:8px; line-height:1.4; letter-spacing:.12em; }
+.library-volume-meta span { white-space:nowrap; }
 @keyframes library-ping { 0%,100% { transform:scale(.85); opacity:.7; } 50% { transform:scale(1.2); opacity:1; } }
 .library-portal { position:absolute; inset:0; z-index:40; display:flex; flex-direction:column; align-items:center; overflow:auto; padding:24px 16px 30px; background:rgba(5,5,7,.97); backdrop-filter:blur(18px); color:#f1eee8; }
 .library-portal-header { width:min(100%,360px); display:flex; justify-content:space-between; align-items:center; }
