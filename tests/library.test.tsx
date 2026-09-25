@@ -60,6 +60,34 @@ describe('Library replacement page', () => {
     expect(release).toHaveBeenCalledWith(7);
   });
 
+  it('keeps settling when a pointer click does not become a drag', () => {
+    vi.spyOn(performance, 'now').mockReturnValueOnce(0).mockReturnValueOnce(10).mockReturnValue(20);
+    const frames: FrameRequestCallback[] = [];
+    vi.spyOn(window, 'requestAnimationFrame').mockImplementation(callback => {
+      frames.push(callback);
+      return frames.length;
+    });
+    const cancel = vi.spyOn(window, 'cancelAnimationFrame');
+    render(<Library />);
+    const carousel = screen.getByRole('region', { name: 'Memory volumes' }).querySelector('.library-books-carousel') as HTMLElement;
+    const february = screen.getByRole('button', { name: /February 2026/ });
+    const may = screen.getByRole('button', { name: /May 2026/ });
+
+    fireEvent(carousel, pointerEvent('pointerdown', 220));
+    fireEvent(carousel, pointerEvent('pointermove', 128));
+    fireEvent(carousel, pointerEvent('pointerup', 128));
+    expect(frames.length).toBeGreaterThan(0);
+
+    fireEvent(february, pointerEvent('pointerdown', 220));
+    fireEvent(february, pointerEvent('pointermove', 218));
+    fireEvent(february, pointerEvent('pointerup', 218));
+    expect(cancel).not.toHaveBeenCalled();
+
+    for (let step = 0; step < 80 && frames.length; step++) frames.shift()?.(step * 16);
+    expect(bookOffset(may)).toBeCloseTo(0, 2);
+    expect(may.classList.contains('is-active')).toBe(true);
+  });
+
   it('closes the open book portal', () => {
     render(<Library />);
     fireEvent.click(screen.getByRole('button', { name: /July 2026/ }));
