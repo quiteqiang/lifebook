@@ -34,6 +34,32 @@ describe('Library replacement page', () => {
     expect(screen.getByRole('button', { name: 'Turn 3D Page' })).toBeTruthy();
   });
 
+  it('leaves a simple pointer click with its book button and captures a real drag', () => {
+    render(<Library />);
+    const carousel = screen.getByRole('region', { name: 'Memory volumes' }).querySelector('.library-books-carousel') as HTMLElement;
+    const book = screen.getByRole('button', { name: /February 2026/ });
+    const capture = vi.fn();
+    const release = vi.fn();
+    carousel.setPointerCapture = capture;
+    carousel.releasePointerCapture = release;
+
+    fireEvent(book, pointerEvent('pointerdown', 220));
+    fireEvent(book, pointerEvent('pointermove', 217));
+    fireEvent(book, pointerEvent('pointerup', 217));
+    expect(capture).not.toHaveBeenCalled();
+    expect(release).not.toHaveBeenCalled();
+    fireEvent.click(book);
+    expect(screen.getByRole('dialog', { name: /February 2026/ })).toBeTruthy();
+
+    fireEvent.click(screen.getByRole('button', { name: 'Close book' }));
+    fireEvent(book, pointerEvent('pointerdown', 220));
+    fireEvent(book, pointerEvent('pointermove', 180));
+    expect(capture).toHaveBeenCalledWith(7);
+    expect(carousel.classList.contains('is-dragging')).toBe(true);
+    fireEvent(carousel, pointerEvent('pointerup', 180));
+    expect(release).toHaveBeenCalledWith(7);
+  });
+
   it('closes the open book portal', () => {
     render(<Library />);
     fireEvent.click(screen.getByRole('button', { name: /July 2026/ }));

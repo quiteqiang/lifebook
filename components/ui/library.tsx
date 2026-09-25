@@ -39,7 +39,7 @@ export function Library({ onReplay }: LibraryProps) {
   const posRef = useRef(1);
   const pitchRef = useRef(108);
   const rafRef = useRef<number | null>(null);
-  const dragRef = useRef<{ pointerId: number; startX: number; startPos: number; velocity: number; time: number } | null>(null);
+  const dragRef = useRef<{ pointerId: number; startX: number; startPos: number; velocity: number; time: number; captured: boolean } | null>(null);
 
   const openBook = (volume: Volume) => {
     setOpenVolume(volume);
@@ -100,13 +100,17 @@ export function Library({ onReplay }: LibraryProps) {
 
   const handlePointerDown = (event: ReactPointerEvent<HTMLDivElement>) => {
     if (rafRef.current !== null) cancelAnimationFrame(rafRef.current);
-    event.currentTarget.setPointerCapture?.(event.pointerId);
-    dragRef.current = { pointerId: event.pointerId, startX: event.clientX, startPos: posRef.current, velocity: 0, time: performance.now() };
-    event.currentTarget.classList.add('is-dragging');
+    dragRef.current = { pointerId: event.pointerId, startX: event.clientX, startPos: posRef.current, velocity: 0, time: performance.now(), captured: false };
   };
   const handlePointerMove = (event: ReactPointerEvent<HTMLDivElement>) => {
     const drag = dragRef.current;
     if (!drag || drag.pointerId !== event.pointerId) return;
+    if (!drag.captured) {
+      if (Math.abs(event.clientX - drag.startX) < 5) return;
+      event.currentTarget.setPointerCapture?.(event.pointerId);
+      drag.captured = true;
+      event.currentTarget.classList.add('is-dragging');
+    }
     event.preventDefault();
     const now = performance.now();
     const previous = posRef.current;
@@ -121,10 +125,12 @@ export function Library({ onReplay }: LibraryProps) {
     const drag = dragRef.current;
     if (!drag || drag.pointerId !== event.pointerId) return;
     dragRef.current = null;
-    event.currentTarget.releasePointerCapture?.(event.pointerId);
-    const carried = Math.max(-2, Math.min(2, drag.velocity * 0.18));
-    settle(Math.round(posRef.current + carried));
-    event.currentTarget.classList.remove('is-dragging');
+    if (drag.captured) {
+      event.currentTarget.releasePointerCapture?.(event.pointerId);
+      const carried = Math.max(-2, Math.min(2, drag.velocity * 0.18));
+      settle(Math.round(posRef.current + carried));
+      event.currentTarget.classList.remove('is-dragging');
+    }
   };
 
   useLayoutEffect(() => {
