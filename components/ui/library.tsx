@@ -50,15 +50,16 @@ export function Library({ onReplay }: LibraryProps) {
     bookRefs.current.forEach((book, index) => {
       if (!book) return;
       const offset = index - position;
-      const distance = Math.abs(offset);
-      const ramp = Math.pow(distance, 0.56);
-      const tilt = Math.min(44 * ramp, 78) * Math.sign(offset);
+      const smoothOffset = offset / Math.sqrt(1 + 0.025 * offset * offset);
+      const distance = Math.abs(smoothOffset);
+      const tilt = Math.max(-78, Math.min(54 * smoothOffset, 78));
       const edge = Math.min(1, Math.max(0, volumes.length / 2 - distance));
-      book.style.transform = `translateX(calc(-50% + ${offset * pitch}px)) translateZ(${-0.42 * pitch * ramp}px) rotateY(${-tilt}deg)`;
+      book.style.transform = `translateX(calc(-50% + ${smoothOffset * pitch}px)) translateZ(${-0.42 * pitch * distance}px) rotateY(${-tilt}deg)`;
       book.style.opacity = String(Math.max(0, 1 - 0.12 * distance) * edge);
       book.style.zIndex = String(100 - Math.round(distance));
+      book.classList.toggle('is-active', index === indexAt(position));
     });
-  }, []);
+  }, [indexAt]);
 
   const settle = useCallback((target: number) => {
     if (rafRef.current !== null) cancelAnimationFrame(rafRef.current);
@@ -102,10 +103,10 @@ export function Library({ onReplay }: LibraryProps) {
     const drag = dragRef.current;
     if (!drag || drag.pointerId !== event.pointerId) return;
     dragRef.current = null;
-    event.currentTarget.classList.remove('is-dragging');
     event.currentTarget.releasePointerCapture?.(event.pointerId);
     const carried = Math.max(-2, Math.min(2, drag.velocity * 0.18));
     settle(Math.round(posRef.current + carried));
+    event.currentTarget.classList.remove('is-dragging');
   };
 
   useLayoutEffect(() => {

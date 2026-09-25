@@ -1,8 +1,21 @@
-import { afterEach, describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { Library } from '@/components/ui/library';
 
-afterEach(() => cleanup());
+afterEach(() => { cleanup(); vi.restoreAllMocks(); });
+
+function pointerEvent(type: string, clientX: number, pointerId = 7) {
+  const event = new Event(type, { bubbles: true, cancelable: true });
+  Object.defineProperties(event, {
+    clientX: { value: clientX },
+    pointerId: { value: pointerId },
+  });
+  return event;
+}
+
+function bookOffset(book: HTMLElement) {
+  return Number(book.style.transform.match(/translateX\(calc\(-50% \+ ([\d.-]+)px\)\)/)?.[1]);
+}
 
 describe('Library replacement page', () => {
   it('shows twelve monthly volumes and opens a book portal', () => {
@@ -35,17 +48,57 @@ describe('Library replacement page', () => {
     const books = screen.getAllByRole('button', { name: /2026/ });
     const initialTransform = books[1].getAttribute('style');
 
-    const down = new Event('pointerdown', { bubbles: true });
-    Object.defineProperty(down, 'clientX', { value: 300 });
-    Object.defineProperty(down, 'pointerId', { value: 7 });
-    const move = new Event('pointermove', { bubbles: true });
-    Object.defineProperty(move, 'clientX', { value: 190 });
-    Object.defineProperty(move, 'pointerId', { value: 7 });
-    fireEvent(carousel, down);
-    fireEvent(carousel, move);
+    fireEvent(carousel, pointerEvent('pointerdown', 300));
+    fireEvent(carousel, pointerEvent('pointermove', 190));
 
     expect(books[1].getAttribute('style')).not.toBe(initialTransform);
     expect(books[1].getAttribute('style')).toContain('translateX');
     expect(screen.getByTestId('library-active-volume').textContent).toContain('March 2026');
+  });
+
+  it('keeps motion continuous as the active month changes', () => {
+    render(<Library />);
+    const carousel = screen.getByRole('region', { name: 'Memory volumes' }).querySelector('.library-books-carousel') as HTMLElement;
+    const february = screen.getByRole('button', { name: /February 2026/ });
+    const march = screen.getByRole('button', { name: /March 2026/ });
+
+    fireEvent(carousel, pointerEvent('pointerdown', 220));
+    fireEvent(carousel, pointerEvent('pointermove', 175));
+    const beforeBoundary = bookOffset(march);
+    expect(february.classList.contains('is-active')).toBe(true);
+
+    fireEvent(carousel, pointerEvent('pointermove', 173));
+    expect(carousel.classList.contains('is-dragging')).toBe(true);
+    expect(march.classList.contains('is-active')).toBe(true);
+    expect(screen.getByTestId('library-active-volume').textContent).toContain('March 2026');
+    expect(Math.abs(bookOffset(march) - beforeBoundary)).toBeLessThan(7);
+    fireEvent(carousel, pointerEvent('pointerup', 173));
+    expect(carousel.classList.contains('is-dragging')).toBe(false);
+  });
+
+  it('clamps a large drag and release to the last volume', () => {
+    render(<Library />);
+    const carousel = screen.getByRole('region', { name: 'Memory volumes' }).querySelector('.library-books-carousel') as HTMLElement;
+    const december = screen.getByRole('button', { name: /December 2026/ });
+
+    fireEvent(carousel, pointerEvent('pointerdown', 220));
+    fireEvent(carousel, pointerEvent('pointermove', -5000));
+    expect(december.classList.contains('is-active')).toBe(true);
+    expect(screen.getByTestId('library-active-volume').textContent).toContain('December 2026');
+    fireEvent(carousel, pointerEvent('pointerup', -5000));
+    expect(screen.getByTestId('library-active-volume').textContent).toContain('December 2026');
+    expect(december.classList.contains('is-active')).toBe(true);
+  });
+
+  it('caps velocity carry to two volumes when settling', () => {
+    vi.spyOn(performance, 'now').mockReturnValueOnce(0).mockReturnValueOnce(10);
+    render(<Library />);
+    const carousel = screen.getByRole('region', { name: 'Memory volumes' }).querySelector('.library-books-carousel') as HTMLElement;
+
+    fireEvent(carousel, pointerEvent('pointerdown', 220));
+    fireEvent(carousel, pointerEvent('pointermove', 128));
+    expect(screen.getByTestId('library-active-volume').textContent).toContain('March 2026');
+    fireEvent(carousel, pointerEvent('pointerup', 128));
+    expect(screen.getByTestId('library-active-volume').textContent).toContain('May 2026');
   });
 });

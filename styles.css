@@ -323,10 +323,12 @@ button:focus-visible {outline:2px solid #557862; outline-offset:5px;}
 .library-books-carousel { position:relative; display:block; width:100%; height:300px; overflow:hidden; padding:0 0 28px; cursor:grab; perspective:900px; touch-action:pan-y; transform:rotateX(14deg) rotateY(-8deg); transform-style:preserve-3d; }
 .library-books-carousel.is-dragging { cursor:grabbing; user-select:none; }
 .library-book-page { display:contents; }
-.library-book { position:absolute; left:50%; bottom:28px; flex:none; width:76px; height:220px; display:flex; flex-direction:column; justify-content:space-between; padding:10px 8px; overflow:visible; border:0; border-radius:4px 7px 6px 3px; color:#eee; cursor:pointer; transform-style:preserve-3d; transition:filter .5s; will-change:transform,opacity; box-shadow:12px 18px 22px #0009; text-align:left; }
+.library-book { position:absolute; left:50%; bottom:28px; flex:none; width:76px; height:220px; display:flex; flex-direction:column; justify-content:space-between; padding:10px 8px; overflow:visible; border:0; border-radius:4px 7px 6px 3px; color:#eee; cursor:pointer; transform-style:preserve-3d; transition:filter .28s ease,box-shadow .28s ease; will-change:transform,opacity; box-shadow:12px 18px 22px #0009; text-align:left; }
 .library-book-position-2 { flex-basis:82px; width:82px; height:245px; }
 .library-book-position-3 { flex-basis:90px; width:90px; height:270px; }
-.library-book:hover, .library-book:focus-visible { transform:translateY(-18px) translateZ(28px) rotateY(-10deg); filter:brightness(1.14); outline:1px solid #f3d98b; outline-offset:3px; }
+.library-book:hover, .library-book:focus-visible { filter:brightness(1.14) drop-shadow(0 0 5px #83c8cd55); box-shadow:12px 18px 22px #0009,0 0 9px #78cbd14a; outline:1px solid #f3d98b; outline-offset:3px; }
+.library-book.is-active { filter:brightness(1.08) drop-shadow(0 0 4px #83c8cd44); box-shadow:12px 18px 22px #0009,0 0 8px #78cbd140; }
+.library-books-carousel.is-dragging .library-book.is-active { filter:brightness(1.12) drop-shadow(0 0 7px #83c8cd66); box-shadow:12px 18px 22px #0009,0 0 13px #78cbd15c; }
 .library-book::before { content:""; position:absolute; inset:0 auto 0 -4px; width:5px; border-radius:4px 0 0 3px; background:#0008; transform:translateZ(-7px); }
 .library-book-slate { background:linear-gradient(145deg,#2b4056,#0d1724 72%); border-right:1px solid #5ed5f6aa; }
 .library-book-crimson { background:linear-gradient(145deg,#7d252f,#260e17 72%); border-right:1px solid #ef8174aa; }
@@ -346,6 +348,8 @@ button:focus-visible {outline:2px solid #557862; outline-offset:5px;}
 .library-book-count { font-size:7px; }
 .library-book-ping { position:absolute; z-index:2; top:-11px; left:50%; width:7px; height:7px; border-radius:50%; background:#e8bd5a; box-shadow:0 0 0 4px #e8bd5a20,0 0 16px #e8bd5a; animation:library-ping 1.8s ease-in-out infinite; }
 .library-volume-caption { position:relative; z-index:1; width:min(100%,260px); min-height:118px; margin:18px auto 0; color:#f5f1e8; text-align:center; }
+.library-volume-caption h2, .library-volume-caption p, .library-volume-kicker { transition:color .28s ease,opacity .28s ease; }
+.library-page:has(.library-books-carousel.is-dragging) .library-volume-caption h2 { color:#f7faf9; }
 .library-volume-kicker { display:block; color:#d4af37; font-size:8px; line-height:1.4; letter-spacing:.24em; }
 .library-volume-caption h2 { margin:12px 0 0; font:600 22px/1.15 Georgia,serif; letter-spacing:.01em; }
 .library-volume-caption p { margin:8px 0 0; color:#9da0ad; font-size:10px; line-height:1.4; letter-spacing:.18em; }
