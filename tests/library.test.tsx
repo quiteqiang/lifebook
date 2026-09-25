@@ -2,7 +2,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { Library } from '@/components/ui/library';
 
-afterEach(() => { cleanup(); vi.restoreAllMocks(); });
+afterEach(() => { cleanup(); vi.restoreAllMocks(); vi.unstubAllGlobals(); });
 
 function pointerEvent(type: string, clientX: number, pointerId = 7) {
   const event = new Event(type, { bubbles: true, cancelable: true });
@@ -100,5 +100,23 @@ describe('Library replacement page', () => {
     expect(screen.getByTestId('library-active-volume').textContent).toContain('March 2026');
     fireEvent(carousel, pointerEvent('pointerup', 128));
     expect(screen.getByTestId('library-active-volume').textContent).toContain('May 2026');
+  });
+
+  it('settles immediately when reduced motion is requested', () => {
+    vi.stubGlobal('matchMedia', vi.fn().mockReturnValue({ matches: true }));
+    vi.spyOn(performance, 'now').mockReturnValueOnce(0).mockReturnValueOnce(10);
+    const frame = vi.spyOn(window, 'requestAnimationFrame');
+    render(<Library />);
+    const carousel = screen.getByRole('region', { name: 'Memory volumes' }).querySelector('.library-books-carousel') as HTMLElement;
+    const may = screen.getByRole('button', { name: /May 2026/ });
+
+    fireEvent(carousel, pointerEvent('pointerdown', 220));
+    fireEvent(carousel, pointerEvent('pointermove', 128));
+    fireEvent(carousel, pointerEvent('pointerup', 128));
+
+    expect(screen.getByTestId('library-active-volume').textContent).toContain('May 2026');
+    expect(bookOffset(may)).toBe(0);
+    expect(may.classList.contains('is-active')).toBe(true);
+    expect(frame).not.toHaveBeenCalled();
   });
 });

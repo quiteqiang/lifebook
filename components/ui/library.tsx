@@ -62,9 +62,17 @@ export function Library({ onReplay }: LibraryProps) {
   }, [indexAt]);
 
   const settle = useCallback((target: number) => {
-    if (rafRef.current !== null) cancelAnimationFrame(rafRef.current);
+    if (rafRef.current !== null) {
+      cancelAnimationFrame(rafRef.current);
+      rafRef.current = null;
+    }
     const nextTarget = clamp(target);
     setSelectedIndex(indexAt(nextTarget));
+    if (window.matchMedia?.('(prefers-reduced-motion: reduce)').matches) {
+      posRef.current = nextTarget;
+      paint();
+      return;
+    }
     const step = () => {
       const remaining = nextTarget - posRef.current;
       if (Math.abs(remaining) < 0.0004) {
