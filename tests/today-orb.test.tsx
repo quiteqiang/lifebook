@@ -18,6 +18,13 @@ describe('Today home visual', () => {
     expect(screen.getByRole('img', { name: 'Animated voice orb' })).toBeTruthy();
   });
 
+  it('uses an icon-only accessible brand header', () => {
+    render(<App />);
+    expect(screen.queryByText('Life Book')).toBeNull();
+    expect(screen.getByRole('banner', { name: 'Life Book' })).toBeTruthy();
+    expect(screen.getByRole('button', { name: 'Library' })).toBeTruthy();
+  });
+
   it('switches the app shell to the Library theme on the second tab', () => {
     render(<App />);
     fireEvent.click(screen.getByRole('button', { name: 'Library' }));

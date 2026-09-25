@@ -5,14 +5,14 @@
 body {margin:0;}
 button {cursor:pointer; -webkit-tap-highlight-color:transparent;}
 button:focus-visible {outline:2px solid #557862; outline-offset:5px;}
-.app-shell {position:relative; isolation:isolate; width:100%; max-width:480px; height:100svh; min-height:540px; margin:auto; overflow:hidden; background:#faf9f5;}
+.app-shell {position:relative; isolation:isolate; width:100%; max-width:480px; height:100svh; min-height:540px; margin:auto; overflow:hidden; background:#faf9f5; transition:background-color .32s ease, background-image .32s ease;}
 .app-shell.is-library { background:linear-gradient(180deg,#050507 0%,#07090e 16%,#11151f 35%,#0c0f17 58%,#050507 100%); }
-.brand {position:absolute; top:max(48px, env(safe-area-inset-top)); left:29px; display:flex; align-items:center; gap:12px; z-index:2;}
-.brand svg {width:34px; height:34px; color:#365d46;}
-.brand span {font-size:23px; font-weight:450; letter-spacing:-.65px;}
+.brand {position:absolute; top:max(48px, env(safe-area-inset-top)); left:50%; display:flex; align-items:center; justify-content:center; z-index:2; transform:translateX(-50%); color:#d4af69;}
+.brand svg {width:34px; height:34px; color:#d4af69; filter:drop-shadow(0 0 9px rgba(84,207,197,.12));}
 .app-shell.is-library .brand { color:#f1eee8; }
 .app-shell.is-library .brand svg { color:#d4af37; }
-.main-stage {position:absolute; inset:105px 0 165px;}
+.main-stage {position:absolute; inset:105px 0 165px; opacity:1; transform:translateY(0); transition:opacity .24s ease, transform .32s ease;}
+.main-stage.tab-book {transform:translateY(5px);}
 .app-shell.is-library .main-stage { top:60px; }
 .orb-position {position:absolute; width:100%; aspect-ratio:1; max-width:420px; left:50%; top:37%; transform:translate(-50%,-50%); transition:filter .5s;}
 .voice-orb {filter: hue-rotate(0deg);}
@@ -45,7 +45,7 @@ button:focus-visible {outline:2px solid #557862; outline-offset:5px;}
 @keyframes pending {50% {opacity:.55;}}
 @media(min-width:600px) {.app-shell {height:min(900px,calc(100svh - 48px)); margin:24px auto; border-radius:38px; border:1px solid #e1e2d8; box-shadow:0 20px 80px #283c2310;}}
 @media(max-height:680px) {.brand {top:28px;} .main-stage {top:85px;bottom:130px;} .orb-position {width:78%;top:34%;} .record-position {bottom:0;} .record-button {width:62px;height:62px;} .bottom-nav {bottom:30px;height:60px;}}
-@media(prefers-reduced-motion:reduce) {*,*::before {animation:none!important;transition:none!important;}}
+@media(prefers-reduced-motion:reduce) {*,*::before {animation:none!important;transition:none!important;} .main-stage,.main-stage.tab-book {transform:none!important;}}
 
 /* Card-stack treatment for MyBook: a tactile fan of saved voice memories. */
 .mybook-stack-scene { position:absolute; inset:18px 0 0; }

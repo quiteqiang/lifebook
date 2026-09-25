@@ -108,8 +108,8 @@ export default function App() {
 
     const isRecording = phase === 'recording';
   return <main className={`app-shell ${tab === 'book' ? 'is-library' : ''}`}>
-    <header className="brand"><BookOpen strokeWidth={1.35} aria-hidden="true" /><span>Life Book</span></header>
-    <section className={`main-stage ${phase}`} aria-label={tab === 'today' ? 'Today' : 'Library'}>
+    <header className="brand" aria-label="Life Book"><BookOpen strokeWidth={1.25} aria-hidden="true" /></header>
+    <section className={`main-stage ${phase} tab-${tab}`} aria-label={tab === 'today' ? 'Today' : 'Library'}>
       {tab === 'today' ? <div className={`orb-position ${voice ? 'is-speaking' : ''}`}>
         <VoicePoweredOrb enableVoiceControl={isRecording} onVoiceDetected={level => { setVoice(level); if (level) levelsRef.current.push(0.75); }} onMicrophoneState={state => { if (state === 'ready') setReady(true); else { setPhase('idle'); setError(true); } }} onMicrophoneStream={handleMicrophoneStream} />
       </div> : <div className="mybook-roll-scene library-scene">
