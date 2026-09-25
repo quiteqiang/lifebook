@@ -83,6 +83,27 @@ describe('Library replacement page', () => {
     expect(screen.getByRole('dialog', { name: /July 2026/ }).classList.contains('is-opening')).toBe(false);
   });
 
+  it('moves focus to the visible page action when the leaf flips away', () => {
+    vi.stubGlobal('matchMedia', vi.fn().mockReturnValue({ matches: true }));
+    render(<Library />);
+    fireEvent.click(screen.getByRole('button', { name: /July 2026/ }));
+    const leaf = screen.getByRole('button', { name: 'Flip page' });
+    const action = screen.getByRole('button', { name: 'Turn 3D Page' });
+
+    leaf.focus();
+    fireEvent.click(leaf);
+    expect(leaf.classList.contains('is-flipped')).toBe(true);
+    expect(leaf.tabIndex).toBe(-1);
+    expect(leaf.getAttribute('aria-hidden')).toBe('true');
+    expect(document.activeElement).toBe(action);
+
+    fireEvent.click(action);
+    expect(leaf.classList.contains('is-flipped')).toBe(false);
+    expect(leaf.tabIndex).toBe(0);
+    expect(leaf.getAttribute('aria-hidden')).toBe('false');
+    expect(document.activeElement).toBe(action);
+  });
+
   it('applies coverflow motion and updates the active volume caption while dragging', () => {
     render(<Library />);
     const carousel = screen.getByRole('region', { name: 'Memory volumes' }).querySelector('.library-books-carousel') as HTMLElement;
