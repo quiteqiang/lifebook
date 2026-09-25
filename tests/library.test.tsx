@@ -4,11 +4,12 @@ import { Library } from '@/components/ui/library';
 
 afterEach(() => { cleanup(); vi.restoreAllMocks(); vi.unstubAllGlobals(); });
 
-function pointerEvent(type: string, clientX: number, pointerId = 7) {
+function pointerEvent(type: string, clientX: number, pointerId = 7, mouseButtons?: number) {
   const event = new Event(type, { bubbles: true, cancelable: true });
   Object.defineProperties(event, {
     clientX: { value: clientX },
     pointerId: { value: pointerId },
+    ...(mouseButtons === undefined ? {} : { pointerType: { value: 'mouse' }, buttons: { value: mouseButtons } }),
   });
   return event;
 }
@@ -113,6 +114,27 @@ describe('Library replacement page', () => {
     fireEvent(carousel, pointerEvent('pointerup', 200));
   });
 
+  it('ignores a return move after an uncaptured pointer leaves or releases outside', () => {
+    render(<Library />);
+    const carousel = screen.getByRole('region', { name: 'Memory volumes' }).querySelector('.library-books-carousel') as HTMLElement;
+    const capture = vi.fn();
+    carousel.setPointerCapture = capture;
+    const caption = screen.getByTestId('library-active-volume');
+
+    fireEvent(carousel, pointerEvent('pointerdown', 220, 7, 1));
+    fireEvent(carousel, pointerEvent('pointermove', 218, 7, 1));
+    fireEvent(carousel, pointerEvent('pointerout', 218, 7, 1));
+    fireEvent(carousel, pointerEvent('pointermove', 100, 7, 0));
+    expect(caption.textContent).toContain('February 2026');
+    expect(capture).not.toHaveBeenCalled();
+
+    fireEvent(carousel, pointerEvent('pointerdown', 220, 7, 1));
+    fireEvent(carousel, pointerEvent('pointermove', 100, 7, 0));
+    expect(caption.textContent).toContain('February 2026');
+    expect(capture).not.toHaveBeenCalled();
+    expect(carousel.classList.contains('is-dragging')).toBe(false);
+  });
+
   it('closes the open book portal', () => {
     render(<Library />);
     fireEvent.click(screen.getByRole('button', { name: /July 2026/ }));
@@ -147,11 +169,16 @@ describe('Library replacement page', () => {
     expect(page.className).toContain('is-flipped');
     expect(page.getAttribute('aria-pressed')).toBe('true');
     expect(screen.getByRole('dialog', { name: /July 2026/ })).toBeTruthy();
+    const turnAction = screen.getByRole('button', { name: 'Turn 3D Page back' });
+    expect(turnAction.getAttribute('aria-pressed')).toBe('true');
+    expect(turnAction.textContent).toContain('Turn 3D Page');
 
     fireEvent.click(screen.getByRole('button', { name: 'Replay Voice' }));
     expect(onReplay).toHaveBeenCalledOnce();
-    fireEvent.click(screen.getByRole('button', { name: 'Turn 3D Page' }));
+    fireEvent.click(turnAction);
     expect(page.className).not.toContain('is-flipped');
+    expect(turnAction.getAttribute('aria-pressed')).toBe('false');
+    expect(screen.getByRole('button', { name: 'Turn 3D Page' })).toBe(turnAction);
   });
 
   it('skips the entrance state when reduced motion is requested', () => {

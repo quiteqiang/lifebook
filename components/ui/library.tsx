@@ -104,6 +104,15 @@ export function Library({ onReplay }: LibraryProps) {
   const handlePointerMove = (event: ReactPointerEvent<HTMLDivElement>) => {
     const drag = dragRef.current;
     if (!drag || drag.pointerId !== event.pointerId) return;
+    if (event.pointerType === 'mouse' && event.buttons === 0) {
+      dragRef.current = null;
+      if (drag.captured) {
+        event.currentTarget.releasePointerCapture?.(event.pointerId);
+        settle(Math.round(posRef.current));
+        event.currentTarget.classList.remove('is-dragging');
+      }
+      return;
+    }
     if (!drag.captured) {
       if (Math.abs(event.clientX - drag.startX) < 5) return;
       if (rafRef.current !== null) {
@@ -140,6 +149,9 @@ export function Library({ onReplay }: LibraryProps) {
       event.currentTarget.classList.remove('is-dragging');
     }
   };
+  const handlePointerLeave = (event: ReactPointerEvent<HTMLDivElement>) => {
+    if (dragRef.current?.pointerId === event.pointerId && !dragRef.current.captured) dragRef.current = null;
+  };
 
   useLayoutEffect(() => {
     const frame = frameRef.current;
@@ -165,7 +177,7 @@ export function Library({ onReplay }: LibraryProps) {
     </header>
     <section className="library-bookshelf" aria-label="Memory volumes">
       <div className="library-shelf-plank" aria-hidden="true" />
-      <div ref={frameRef} className="library-books library-books-carousel" draggable={false} onDragStart={(event) => event.preventDefault()} onPointerDown={handlePointerDown} onPointerMove={handlePointerMove} onPointerUp={handlePointerEnd} onPointerCancel={handlePointerEnd}>
+      <div ref={frameRef} className="library-books library-books-carousel" draggable={false} onDragStart={(event) => event.preventDefault()} onPointerDown={handlePointerDown} onPointerMove={handlePointerMove} onPointerUp={handlePointerEnd} onPointerCancel={handlePointerEnd} onPointerLeave={handlePointerLeave}>
         {volumes.map((volume, index) => <button key={volume.id} ref={(node) => { bookRefs.current[index] = node; }} type="button" className={`library-book library-book-${volume.tone} library-book-position-${(index % 3) + 1}`} aria-label={`${volume.month} ${volume.subtitle}`} onClick={() => openBook(volume)}>
           {volume.id === 9 && <span className="library-book-ping" aria-hidden="true" />}
           <span className="library-book-top">{volume.roman}</span>
@@ -194,7 +206,7 @@ export function Library({ onReplay }: LibraryProps) {
           <span className="library-book-spine" aria-hidden="true" />
         </div>
       </div>
-      <div className="library-portal-actions"><button ref={turnActionRef} type="button" onClick={turnPage}><RotateCcw size={14} />Turn 3D Page</button><button type="button" onClick={onReplay}><Play size={14} fill="currentColor" />Replay Voice</button></div>
+      <div className="library-portal-actions"><button ref={turnActionRef} type="button" aria-label={flipped ? 'Turn 3D Page back' : 'Turn 3D Page'} aria-pressed={flipped} onClick={turnPage}><RotateCcw size={14} />Turn 3D Page</button><button type="button" onClick={onReplay}><Play size={14} fill="currentColor" />Replay Voice</button></div>
     </div>}
   </div>;
 }
