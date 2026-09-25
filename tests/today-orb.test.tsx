@@ -27,7 +27,9 @@ describe('Today home visual', () => {
 
   it('switches the app shell to the Library theme on the second tab', () => {
     render(<App />);
+    expect(document.querySelector('.main-stage')?.className).toContain('tab-today');
     fireEvent.click(screen.getByRole('button', { name: 'Library' }));
     expect(document.querySelector('.app-shell')?.className).toContain('is-library');
+    expect(document.querySelector('.main-stage')?.className).toContain('tab-book');
   });
 });

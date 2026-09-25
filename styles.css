@@ -11,8 +11,9 @@ button:focus-visible {outline:2px solid #557862; outline-offset:5px;}
 .brand svg {width:34px; height:34px; color:#d4af69; filter:drop-shadow(0 0 9px rgba(84,207,197,.12));}
 .app-shell.is-library .brand { color:#f1eee8; }
 .app-shell.is-library .brand svg { color:#d4af37; }
-.main-stage {position:absolute; inset:105px 0 165px; opacity:1; transform:translateY(0); transition:opacity .24s ease, transform .32s ease;}
-.main-stage.tab-book {transform:translateY(5px);}
+.main-stage {position:absolute; inset:105px 0 165px; opacity:1; transform:translateY(0);}
+.main-stage.tab-today {animation:stage-enter-today .32s ease both;}
+.main-stage.tab-book {transform:translateY(5px); animation:stage-enter-book .32s ease both;}
 .app-shell.is-library .main-stage { top:60px; }
 .orb-position {position:absolute; width:100%; aspect-ratio:1; max-width:420px; left:50%; top:37%; transform:translate(-50%,-50%); transition:filter .5s;}
 .voice-orb {filter: hue-rotate(0deg);}
@@ -43,6 +44,8 @@ button:focus-visible {outline:2px solid #557862; outline-offset:5px;}
 .orb-fallback::before {content:"";position:absolute;inset:16%;border-radius:50%;border:14px solid #65dbc6;border-top-color:#167b79;filter:blur(7px);animation:fallback 9s linear infinite;}
 @keyframes fallback {to {transform:rotate(360deg);}}
 @keyframes pending {50% {opacity:.55;}}
+@keyframes stage-enter-today {from {opacity:0; transform:translateY(-5px);} to {opacity:1; transform:translateY(0);}}
+@keyframes stage-enter-book {from {opacity:0; transform:translateY(10px);} to {opacity:1; transform:translateY(5px);}}
 @media(min-width:600px) {.app-shell {height:min(900px,calc(100svh - 48px)); margin:24px auto; border-radius:38px; border:1px solid #e1e2d8; box-shadow:0 20px 80px #283c2310;}}
 @media(max-height:680px) {.brand {top:28px;} .main-stage {top:85px;bottom:130px;} .orb-position {width:78%;top:34%;} .record-position {bottom:0;} .record-button {width:62px;height:62px;} .bottom-nav {bottom:30px;height:60px;}}
 @media(prefers-reduced-motion:reduce) {*,*::before {animation:none!important;transition:none!important;} .main-stage,.main-stage.tab-book {transform:none!important;}}
