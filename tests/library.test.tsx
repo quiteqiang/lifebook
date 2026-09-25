@@ -88,6 +88,31 @@ describe('Library replacement page', () => {
     expect(may.classList.contains('is-active')).toBe(true);
   });
 
+  it('starts a held drag from the settled position after animation finishes', () => {
+    vi.spyOn(performance, 'now').mockReturnValueOnce(0).mockReturnValueOnce(10).mockReturnValue(20);
+    const frames: FrameRequestCallback[] = [];
+    vi.spyOn(window, 'requestAnimationFrame').mockImplementation(callback => {
+      frames.push(callback);
+      return frames.length;
+    });
+    render(<Library />);
+    const carousel = screen.getByRole('region', { name: 'Memory volumes' }).querySelector('.library-books-carousel') as HTMLElement;
+    const may = screen.getByRole('button', { name: /May 2026/ });
+
+    fireEvent(carousel, pointerEvent('pointerdown', 220));
+    fireEvent(carousel, pointerEvent('pointermove', 128));
+    fireEvent(carousel, pointerEvent('pointerup', 128));
+    fireEvent(carousel, pointerEvent('pointerdown', 220));
+    for (let step = 0; step < 80 && frames.length; step++) frames.shift()?.(step * 16);
+
+    const beforeDrag = bookOffset(may);
+    expect(beforeDrag).toBeCloseTo(0, 2);
+    fireEvent(carousel, pointerEvent('pointermove', 200));
+    expect(carousel.classList.contains('is-dragging')).toBe(true);
+    expect(Math.abs(bookOffset(may) - beforeDrag)).toBeLessThan(7);
+    fireEvent(carousel, pointerEvent('pointerup', 200));
+  });
+
   it('closes the open book portal', () => {
     render(<Library />);
     fireEvent.click(screen.getByRole('button', { name: /July 2026/ }));

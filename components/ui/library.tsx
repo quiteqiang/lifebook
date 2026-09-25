@@ -109,6 +109,8 @@ export function Library({ onReplay }: LibraryProps) {
       if (rafRef.current !== null) {
         cancelAnimationFrame(rafRef.current);
         rafRef.current = null;
+      }
+      if (Math.abs(posRef.current - drag.startPos) > 0.0004) {
         const direction = Math.sign(event.clientX - drag.startX);
         drag.startX = event.clientX - direction * 5;
         drag.startPos = posRef.current;
