@@ -42,6 +42,47 @@ describe('Library replacement page', () => {
     expect(screen.queryByRole('dialog')).toBeNull();
   });
 
+  it('opens with book depth and completes its entrance after the transition', () => {
+    render(<Library />);
+    fireEvent.click(screen.getByRole('button', { name: /July 2026/ }));
+    const dialog = screen.getByRole('dialog', { name: /July 2026/ });
+
+    expect(dialog.classList.contains('is-opening')).toBe(true);
+    expect(dialog.querySelector('.library-book-spine')).toBeTruthy();
+    expect(dialog.querySelector('.library-cover-depth')).toBeTruthy();
+    expect(dialog.querySelector('.library-page-edges')).toBeTruthy();
+
+    fireEvent.animationEnd(dialog);
+    expect(dialog.classList.contains('is-opening')).toBe(false);
+  });
+
+  it('turns the open book page in place and keeps its controls available', () => {
+    const onReplay = vi.fn();
+    render(<Library onReplay={onReplay} />);
+    fireEvent.click(screen.getByRole('button', { name: /July 2026/ }));
+    const page = screen.getByRole('button', { name: 'Flip page' });
+    expect(page.className).not.toContain('is-flipped');
+    expect(page.getAttribute('aria-pressed')).toBe('false');
+
+    fireEvent.click(page);
+    expect(page.className).toContain('is-flipped');
+    expect(page.getAttribute('aria-pressed')).toBe('true');
+    expect(screen.getByRole('dialog', { name: /July 2026/ })).toBeTruthy();
+
+    fireEvent.click(screen.getByRole('button', { name: 'Replay Voice' }));
+    expect(onReplay).toHaveBeenCalledOnce();
+    fireEvent.click(screen.getByRole('button', { name: 'Turn 3D Page' }));
+    expect(page.className).not.toContain('is-flipped');
+  });
+
+  it('skips the entrance state when reduced motion is requested', () => {
+    vi.stubGlobal('matchMedia', vi.fn().mockReturnValue({ matches: true }));
+    render(<Library />);
+    fireEvent.click(screen.getByRole('button', { name: /July 2026/ }));
+
+    expect(screen.getByRole('dialog', { name: /July 2026/ }).classList.contains('is-opening')).toBe(false);
+  });
+
   it('applies coverflow motion and updates the active volume caption while dragging', () => {
     render(<Library />);
     const carousel = screen.getByRole('region', { name: 'Memory volumes' }).querySelector('.library-books-carousel') as HTMLElement;

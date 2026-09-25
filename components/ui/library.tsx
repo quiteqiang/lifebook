@@ -31,6 +31,7 @@ type LibraryProps = { onReplay?: () => void };
 export function Library({ onReplay }: LibraryProps) {
   const [openVolume, setOpenVolume] = useState<Volume | null>(null);
   const [flipped, setFlipped] = useState(false);
+  const [isOpening, setIsOpening] = useState(false);
   const [selectedIndex, setSelectedIndex] = useState(1);
   const frameRef = useRef<HTMLDivElement | null>(null);
   const bookRefs = useRef<(HTMLButtonElement | null)[]>([]);
@@ -39,8 +40,13 @@ export function Library({ onReplay }: LibraryProps) {
   const rafRef = useRef<number | null>(null);
   const dragRef = useRef<{ pointerId: number; startX: number; startPos: number; velocity: number; time: number } | null>(null);
 
-  const openBook = (volume: Volume) => { setOpenVolume(volume); setFlipped(false); };
-  const closeBook = () => { setOpenVolume(null); setFlipped(false); };
+  const openBook = (volume: Volume) => {
+    setOpenVolume(volume);
+    setFlipped(false);
+    setIsOpening(!window.matchMedia?.('(prefers-reduced-motion: reduce)').matches);
+  };
+  const closeBook = () => { setOpenVolume(null); setFlipped(false); setIsOpening(false); };
+  const turnPage = () => setFlipped(value => !value);
   const indexAt = useCallback((position: number) => Math.round(position), []);
   const clamp = useCallback((position: number) => Math.max(0, Math.min(volumes.length - 1, position)), []);
 
@@ -158,16 +164,19 @@ export function Library({ onReplay }: LibraryProps) {
       <div className="library-volume-meta"><span>{volumes[selectedIndex].count}</span><span>VOICE ARCHIVE</span></div>
     </div>
 
-    {openVolume && <div className="library-portal" role="dialog" aria-modal="true" aria-label={`${openVolume.month} book`}>
+    {openVolume && <div className={`library-portal ${isOpening ? 'is-opening' : ''}`} role="dialog" aria-modal="true" aria-label={`${openVolume.month} book`} onAnimationEnd={(event) => { if (event.target === event.currentTarget) setIsOpening(false); }}>
       <div className="library-portal-header"><div><span>VOL. {openVolume.roman} · MEMOIR</span><h2>{openVolume.month}</h2></div><button type="button" aria-label="Close book" onClick={closeBook}><X size={17} /></button></div>
       <div className="library-book-scene">
         <div className="library-real-book">
+          <span className="library-cover-depth" aria-hidden="true" />
+          <span className="library-page-edges" aria-hidden="true" />
           <div className="library-page-left"><div><span>ENTRY 09.22</span><h3>The Autumn Equinox</h3><hr /><p>“We sat as shadows stretched over the pavement. The voice note didn't capture just words—it sealed the exact courage of that breath.”</p></div><div className="library-page-meta"><span><BookOpen size={12} /> 48s Audio Captured</span><small>P. 142 · @Sarah</small></div></div>
           <div className="library-page-right"><div><span>AUTO-SCRIBED</span><p>“Life isn't measured by milestones typed out after they are forgotten, but by moments spoken while they are still warm.”</p></div><small>LIFEBOOK PRESS · P. 143</small></div>
-          <button type="button" className={`library-flip-leaf ${flipped ? 'is-flipped' : ''}`} aria-label="Flip page" onClick={() => setFlipped(value => !value)}><span>PREVIEW FLIP</span><p>Tap this page to turn in 3D…</p><small>Flip Page →</small></button>
+          <button type="button" className={`library-flip-leaf ${flipped ? 'is-flipped' : ''}`} aria-label="Flip page" aria-pressed={flipped} onClick={turnPage}><span>PREVIEW FLIP</span><p>Tap this page to turn in 3D…</p><small>Flip Page →</small></button>
+          <span className="library-book-spine" aria-hidden="true" />
         </div>
       </div>
-      <div className="library-portal-actions"><button type="button" onClick={() => setFlipped(value => !value)}><RotateCcw size={14} />Turn 3D Page</button><button type="button" onClick={onReplay}><Play size={14} fill="currentColor" />Replay Voice</button></div>
+      <div className="library-portal-actions"><button type="button" onClick={turnPage}><RotateCcw size={14} />Turn 3D Page</button><button type="button" onClick={onReplay}><Play size={14} fill="currentColor" />Replay Voice</button></div>
     </div>}
   </div>;
 }
