@@ -39,20 +39,11 @@ export function BookBuilder({ memories, playingId, onPlay }: BookBuilderProps) {
   return <div className="book-builder-page" aria-label="Make your book">
     <header className="book-builder-header">
       <div>
-        <span className="book-builder-eyebrow">MAKE YOUR BOOK</span>
+        <span className="book-builder-eyebrow">BOOK</span>
         <h1>Your voice, in print.</h1>
-        <p>Choose the moments you want to keep close.</p>
       </div>
       <span className="book-builder-voice-count">{memories.length} VOICES</span>
     </header>
-
-    <div className="book-builder-steps" aria-label="Book creation steps">
-      <span className="is-current"><b>01</b> SELECT</span>
-      <i aria-hidden="true" />
-      <span><b>02</b> PREVIEW</span>
-      <i aria-hidden="true" />
-      <span><b>03</b> ORDER</span>
-    </div>
 
     <section className="book-builder-preview" aria-label="Book preview">
       <div className="book-builder-preview-haze" aria-hidden="true" />
@@ -66,14 +57,14 @@ export function BookBuilder({ memories, playingId, onPlay }: BookBuilderProps) {
         <div className="book-builder-pages" />
       </div>
       <div className="book-builder-preview-note">
-        <div><span>LIVE PREVIEW</span><strong>{selectedMemories.length ? `Volume ${String(selectedMemories.length).padStart(2, '0')}` : 'Start with a moment'}</strong></div>
+        <div><strong>{selectedMemories.length ? `Volume ${String(selectedMemories.length).padStart(2, '0')}` : 'Start with a moment'}</strong></div>
         <small>{pageCount} pages · linen cover</small>
       </div>
     </section>
 
     <section className="book-builder-selection" aria-label="Choose voice memories">
       <div className="book-builder-section-heading">
-        <div><span>YOUR MOMENTS</span><h2>Choose what goes in.</h2></div>
+        <div><h2>Select moments</h2></div>
         <strong>{selectedMemories.length}/{memories.length}</strong>
       </div>
       {memories.length ? <div className="book-builder-memory-list">{memories.map((memory, index) => {
@@ -92,16 +83,14 @@ export function BookBuilder({ memories, playingId, onPlay }: BookBuilderProps) {
     </section>
 
     <div className="book-builder-footer">
-      <div><span>{selectedMemories.length ? 'READY TO PRINT' : 'SELECT A MOMENT'}</span><strong>{selectedMemories.length ? `${selectedMemories.length} memories selected` : 'Your book starts with one voice.'}</strong></div>
+      <div><strong>{selectedMemories.length ? `${selectedMemories.length} memories selected` : 'Select a moment to begin.'}</strong></div>
       <button type="button" disabled={!selectedMemories.length} onClick={() => setOrderOpen(true)}>Make this book <ArrowRight size={15} /></button>
     </div>
 
     {orderOpen && <div className="book-order-overlay" role="dialog" aria-modal="true" aria-label="Confirm book order">
       <div className="book-order-sheet">
         <button type="button" className="book-order-close" aria-label="Close order summary" onClick={() => setOrderOpen(false)}><X size={17} /></button>
-        <span className="book-builder-eyebrow">READY TO MAKE</span>
         <h2>Your Voice Book</h2>
-        <p>A linen-bound keepsake with your selected moments, arranged as a quiet volume of your life.</p>
         <div className="book-order-summary"><span><b>{selectedMemories.length}</b> memories</span><span><b>{pageCount}</b> pages</span><span><b>Linen</b> cover</span></div>
         <div className="book-order-actions"><button type="button" onClick={() => setOrderOpen(false)}>Back to edit</button><button type="button" onClick={() => setOrderOpen(false)}>Request this book <ArrowRight size={14} /></button></div>
       </div>
