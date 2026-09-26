@@ -5,10 +5,13 @@ const initial = { level: 0, time: 0, rotation: 0 };
 const options = { maxRotationSpeed: 1.2, maxHoverIntensity: 0.8 };
 
 describe('voice orb motion', () => {
-  it('uses elapsed time at low frame rates but bounds a long resume gap', () => {
+  it('uses visible low-FPS frame time and bounds only resume gaps', () => {
     expect(orbFrameDelta(0, 100)).toBe(0);
     expect(orbFrameDelta(100, 300)).toBeCloseTo(0.2);
-    expect(orbFrameDelta(300, 2300)).toBeCloseTo(0.05);
+    expect(orbFrameDelta(300, 600)).toBeCloseTo(0.3);
+    expect(orbFrameDelta(600, 900, true)).toBeCloseTo(0.05);
+    expect(orbFrameDelta(900, 1200)).toBeCloseTo(0.3);
+    expect(orbFrameDelta(1200, 3200)).toBeCloseTo(0.05);
   });
 
   it('drifts gently while silent and eases into and out of speaking motion', () => {

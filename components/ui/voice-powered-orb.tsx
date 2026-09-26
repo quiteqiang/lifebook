@@ -20,10 +20,10 @@ interface VoicePoweredOrbProps {
 interface OrbMotionState { level: number; time: number; rotation: number }
 interface OrbMotionOptions { maxRotationSpeed: number; maxHoverIntensity: number }
 
-export function orbFrameDelta(lastTime: number, now: number) {
+export function orbFrameDelta(lastTime: number, now: number, resuming = false) {
   if (!lastTime) return 0;
   const elapsed = Math.max((now - lastTime) / 1000, 0);
-  return elapsed > 0.25 ? 0.05 : elapsed;
+  return resuming || elapsed > 1 ? 0.05 : elapsed;
 }
 
 export function advanceOrbMotion(
@@ -125,13 +125,17 @@ export function VoicePoweredOrb({className, hue = 0, enableVoiceControl = true,
     observer.observe(container);
     resize();
     const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)');
-    let frame = 0, lastTime = 0, detected = false;
+    let frame = 0, lastTime = 0, detected = false, wasHidden = document.hidden;
+    const onVisibilityChange = () => { if (document.hidden) wasHidden = true; };
+    document.addEventListener('visibilitychange', onVisibilityChange);
     let motion: OrbMotionState = {level: 0, time: 0, rotation: 0};
     const update = (now: number) => {
       frame = requestAnimationFrame(update);
-      const dt = orbFrameDelta(lastTime, now);
+      const hidden = document.hidden;
+      const dt = orbFrameDelta(lastTime, now, wasHidden || hidden);
       lastTime = now;
-      if (document.hidden) return;
+      if (hidden) { wasHidden = true; return; }
+      wasHidden = false;
       const settings = options.current;
       const audio = audioRef.current;
       let level = 0;
@@ -157,6 +161,7 @@ export function VoicePoweredOrb({className, hue = 0, enableVoiceControl = true,
     canvas.addEventListener('webglcontextlost', onContextLost);
     return () => {
       cancelAnimationFrame(frame);
+      document.removeEventListener('visibilitychange', onVisibilityChange);
       observer.disconnect();
       canvas.removeEventListener('webglcontextlost', onContextLost);
       geometry.remove();

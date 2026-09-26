@@ -30,6 +30,12 @@
 ## Low-frame-rate timing correction
 
 - Review found that the original 50 ms cap applied to every frame. At a sustained 5 FPS, the Orb advanced only 50 ms for each 200 ms frame, making its motion four times slower.
-- `orbFrameDelta` now uses the actual elapsed time through 250 ms and applies a 50 ms recovery step only after a longer gap. The render loop still updates `lastTime` before returning for a hidden tab, so hidden-tab behavior is preserved. Exponential level easing and integrated rotation/time continue to use the resulting frame duration.
+- The first correction used the actual elapsed time through 250 ms and applied a 50 ms recovery step after a longer gap. The render loop continued updating `lastTime` before returning for a hidden tab. The following boundary correction supersedes that 250 ms threshold.
 - A focused test was written first and failed because `orbFrameDelta` did not exist. It covers a 200 ms frame and a 2-second resume gap.
 - Verification after the correction: focused Orb tests — 3 files, 12 tests passed; `npm test` — 11 files, 43 tests passed; `npm run build` — passed, 1,653 modules transformed; `git diff --check` — passed.
+
+## Visible low-FPS boundary correction
+
+- A sustained visible cadence of 300 ms still hit the prior 250 ms cap. The render loop now records when the page was hidden and clamps only its first resumed frame to 50 ms. A gap over one second is also treated as a suspended-render recovery. Other visible frames use their full elapsed time, including 300 ms frames.
+- The focused boundary test failed first at the visible 300 ms assertion. It now covers ordinary 200 and 300 ms frames, a hidden/resumed frame, the next visible frame, and a two-second suspension gap.
+- Verification: focused Orb tests — 3 files, 12 tests passed; `npm test` — 11 files, 43 tests passed; `npm run build` — passed, 1,653 modules transformed; `git diff --check` — passed.
