@@ -193,7 +193,7 @@ export function Library({ onReplay }: LibraryProps) {
     </div>
 
     {openVolume && <div className={`library-portal ${isOpening ? 'is-opening' : ''}`} role="dialog" aria-modal="true" aria-label={`${openVolume.month} book`} onAnimationEnd={(event) => { if (event.target === event.currentTarget) setIsOpening(false); }}>
-      <div className="library-portal-header"><div><span>VOL. {openVolume.roman} · MEMOIR</span><h2>{openVolume.month}</h2></div><button type="button" aria-label="Close book" onClick={closeBook}><X size={17} /></button></div>
+      <div className="library-portal-header"><div><h2>{openVolume.month}</h2></div><button type="button" aria-label="Close book" onClick={closeBook}><X size={17} /></button></div>
       <div className="library-book-scene">
         <div className="library-real-book">
           <span className="library-cover-depth" aria-hidden="true" />
