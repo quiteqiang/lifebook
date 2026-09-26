@@ -17,6 +17,32 @@ interface VoicePoweredOrbProps {
   onMicrophoneStream?: (stream: MediaStream | null) => void;
 }
 
+interface OrbMotionState { level: number; time: number; rotation: number }
+interface OrbMotionOptions { maxRotationSpeed: number; maxHoverIntensity: number }
+
+export function advanceOrbMotion(
+  previous: OrbMotionState, rawLevel: number, dt: number, reducedMotion: boolean, options: OrbMotionOptions,
+) {
+  if (reducedMotion) return {...previous, level: 0, hover: 0, hoverIntensity: 0};
+
+  const target = Math.min(Math.max(rawLevel, 0), 1);
+  const duration = Math.max(dt, 0);
+  const response = target > previous.level ? 0.18 : 0.35;
+  const blend = 1 - Math.exp(-duration / response);
+  const level = previous.level + (target - previous.level) * blend;
+  const averageLevel = duration > 0
+    ? target + (previous.level - target) * response * blend / duration
+    : previous.level;
+
+  return {
+    level,
+    time: previous.time + duration * (0.18 + averageLevel * 0.82),
+    rotation: previous.rotation + duration * (0.08 + averageLevel * (0.22 + options.maxRotationSpeed * 1.1)),
+    hover: 0.14 + level * 0.86,
+    hoverIntensity: options.maxHoverIntensity * (0.18 + level * 0.82),
+  };
+}
+
 export function VoicePoweredOrb({className, hue = 0, enableVoiceControl = true,
   voiceSensitivity = 1.5, maxRotationSpeed = 1.2, maxHoverIntensity = 0.8,
   onVoiceDetected, onMicrophoneState, onMicrophoneStream}: VoicePoweredOrbProps) {
@@ -93,7 +119,8 @@ export function VoicePoweredOrb({className, hue = 0, enableVoiceControl = true,
     observer.observe(container);
     resize();
     const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)');
-    let frame = 0, lastTime = 0, time = 0, rotation = 0, detected = false;
+    let frame = 0, lastTime = 0, detected = false;
+    let motion: OrbMotionState = {level: 0, time: 0, rotation: 0};
     const update = (now: number) => {
       frame = requestAnimationFrame(update);
       const dt = lastTime ? Math.min((now - lastTime) / 1000, 0.05) : 0;
@@ -110,15 +137,13 @@ export function VoicePoweredOrb({className, hue = 0, enableVoiceControl = true,
       }
       const nextDetected = level > 0.1;
       if (nextDetected !== detected) { detected = nextDetected; settings.onVoiceDetected?.(detected); }
-      if (!reducedMotion.matches) {
-        time += dt;
-        if (level > 0.05) rotation += dt * (0.3 + level * settings.maxRotationSpeed * 2);
-      }
-      program.uniforms.iTime.value = time;
-      program.uniforms.rot.value = rotation;
+      const nextMotion = advanceOrbMotion(motion, level, dt, reducedMotion.matches, settings);
+      motion = nextMotion;
+      program.uniforms.iTime.value = nextMotion.time;
+      program.uniforms.rot.value = nextMotion.rotation;
       program.uniforms.hue.value = settings.hue;
-      program.uniforms.hover.value = reducedMotion.matches ? 0 : Math.min(level * 2, 1);
-      program.uniforms.hoverIntensity.value = Math.min(level * settings.maxHoverIntensity * 0.8, settings.maxHoverIntensity);
+      program.uniforms.hover.value = nextMotion.hover;
+      program.uniforms.hoverIntensity.value = nextMotion.hoverIntensity;
       renderer.render({scene: mesh});
     };
     frame = requestAnimationFrame(update);
