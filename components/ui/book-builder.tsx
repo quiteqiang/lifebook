@@ -45,6 +45,14 @@ export function BookBuilder({ memories, playingId, onPlay }: BookBuilderProps) {
       <span className="book-builder-voice-count">{memories.length} VOICES</span>
     </header>
 
+    <div className="book-builder-steps" aria-label="Book order steps">
+      <span className="is-current"><b>01</b> SELECT</span>
+      <i aria-hidden="true" />
+      <span><b>02</b> PREVIEW</span>
+      <i aria-hidden="true" />
+      <span><b>03</b> ORDER</span>
+    </div>
+
     <section className="book-builder-preview" aria-label="Book preview">
       <div className="book-builder-preview-haze" aria-hidden="true" />
       <div className="book-builder-book" aria-hidden="true">
