@@ -170,9 +170,7 @@ export function Library({ onReplay }: LibraryProps) {
   }, []);
 
   return <div className="library-page" aria-label="Library">
-    <header className="library-header">
-      <BookOpen size={23} strokeWidth={1.2} aria-hidden="true" />
-    </header>
+    <header className="library-header" aria-hidden="true" />
     <section className="library-bookshelf" aria-label="Memory volumes">
       <div className="library-shelf-plank" aria-hidden="true" />
       <div ref={frameRef} className="library-books library-books-carousel" draggable={false} onDragStart={(event) => event.preventDefault()} onPointerDown={handlePointerDown} onPointerMove={handlePointerMove} onPointerUp={handlePointerEnd} onPointerCancel={handlePointerEnd} onPointerLeave={handlePointerLeave}>
