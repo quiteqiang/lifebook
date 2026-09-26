@@ -7,10 +7,13 @@ button {cursor:pointer; -webkit-tap-highlight-color:transparent;}
 button:focus-visible {outline:2px solid #557862; outline-offset:5px;}
 .app-shell {position:relative; isolation:isolate; width:100%; max-width:480px; height:100svh; min-height:540px; margin:auto; overflow:hidden; background:#faf9f5; transition:background-color .32s ease, background-image .32s ease;}
 .app-shell.is-library { background:linear-gradient(180deg,#050507 0%,#07090e 16%,#11151f 35%,#0c0f17 58%,#050507 100%); }
+.app-shell.is-today { background:linear-gradient(180deg,#050507 0%,#07090e 16%,#11151f 35%,#0c0f17 58%,#050507 100%); }
 .brand {position:absolute; top:max(48px, env(safe-area-inset-top)); left:50%; display:flex; align-items:center; justify-content:center; z-index:2; transform:translateX(-50%); color:#d4af69;}
 .brand svg {width:34px; height:34px; color:#d4af69; filter:drop-shadow(0 0 9px rgba(84,207,197,.12));}
 .app-shell.is-library .brand { color:#f1eee8; }
 .app-shell.is-library .brand svg { color:#d4af37; }
+.app-shell.is-today .brand { color:#f1eee8; }
+.app-shell.is-today .brand svg { color:#d4af37; }
 .main-stage {position:absolute; inset:105px 0 165px; opacity:1; transform:translateY(0);}
 .main-stage.tab-today {animation:stage-enter-today .32s ease both;}
 .main-stage.tab-book {transform:translateY(5px); animation:stage-enter-book .32s ease both;}
@@ -19,6 +22,8 @@ button:focus-visible {outline:2px solid #557862; outline-offset:5px;}
 .voice-orb {filter: hue-rotate(0deg);}
 .voice-orb canvas {display:block; width:100%; height:100%;}
 .is-speaking {filter:drop-shadow(0 0 18px #62d9c85c);}
+.app-shell.is-today .orb-position {filter:drop-shadow(0 0 12px #62d9c82b);}
+.app-shell.is-today .orb-position.is-speaking {filter:drop-shadow(0 0 18px #62d9c85c);}
 .record-position {position:absolute; bottom:6%; left:50%; transform:translateX(-50%);}
 .record-button {width:76px; height:76px; padding:0; border-radius:50%; background:#244d3b; color:#fffef9; border:1px solid #ffffff12; box-shadow:0 12px 26px #25453416, inset 0 1px 1px #ffffff15; transition:transform .25s, background .25s, box-shadow .25s;}
 .record-button:hover {background:#315d48; transform:translateY(-2px);}
@@ -26,6 +31,9 @@ button:focus-visible {outline:2px solid #557862; outline-offset:5px;}
 .record-button svg {width:31px; height:31px;}
 .record-button.is-recording {background:#3b6954; box-shadow:0 0 0 8px #466d4810, 0 12px 26px #25453416;}
 .record-button.is-recording svg {width:22px; height:22px;}
+.app-shell.is-today .record-button { background:#123f42; color:#9de8dc; border-color:#62d9c82b; box-shadow:0 12px 26px #0005, inset 0 1px 1px #b9fff022; }
+.app-shell.is-today .record-button:hover { background:#195457; }
+.app-shell.is-today .record-button.is-recording { background:#176064; box-shadow:0 0 0 8px #62d9c81c, 0 12px 26px #0005; }
 .is-pending {animation:pending 1.3s ease-in-out infinite;}
 .bottom-nav {position:absolute; bottom:max(42px, calc(env(safe-area-inset-bottom) + 18px)); left:50%; transform:translateX(-50%); width:258px; height:68px; padding:5px; display:flex; border:1px solid #e6e5dc; border-radius:40px; background:#fffefa; box-shadow:0 7px 22px #48482b05;}
 .bottom-nav button {display:flex; flex:1; flex-direction:column; align-items:center; justify-content:center; gap:3px; border:0; border-radius:32px; color:#888984; background:transparent; font-size:12px; font-weight:500; transition:background .25s,color .25s;}
@@ -36,6 +44,10 @@ button:focus-visible {outline:2px solid #557862; outline-offset:5px;}
 .app-shell.is-library .bottom-nav button { color:#8d8e99; }
 .app-shell.is-library .bottom-nav button[aria-current] { background:#29251d; color:#e6c687; }
 .app-shell.is-library .home-indicator { background:#f1eee8; }
+.app-shell.is-today .bottom-nav { border-color:#3b3940; background:#121217; box-shadow:0 7px 22px #0008; }
+.app-shell.is-today .bottom-nav button { color:#8d8e99; }
+.app-shell.is-today .bottom-nav button[aria-current] { background:#29251d; color:#e6c687; }
+.app-shell.is-today .home-indicator { background:#f1eee8; }
 .error-message {position:absolute; bottom:125px; left:24px; right:24px; z-index:4; display:flex; align-items:center; gap:10px; padding:13px 15px; background:#fff5ed; color:#80513e; border:1px solid #e6d8cc; border-radius:14px; font-size:12px; line-height:1.5; box-shadow:0 5px 24px #00000006;}
 .error-message button {padding:5px;background:none;border:0;color:inherit;}
 .book-empty {height:100%;display:grid;place-items:center;}
@@ -46,7 +58,7 @@ button:focus-visible {outline:2px solid #557862; outline-offset:5px;}
 @keyframes pending {50% {opacity:.55;}}
 @keyframes stage-enter-today {from {opacity:0; transform:translateY(-5px);} to {opacity:1; transform:translateY(0);}}
 @keyframes stage-enter-book {from {opacity:0; transform:translateY(10px);} to {opacity:1; transform:translateY(5px);}}
-@media(min-width:600px) {.app-shell {height:min(900px,calc(100svh - 48px)); margin:24px auto; border-radius:38px; border:1px solid #e1e2d8; box-shadow:0 20px 80px #283c2310;}}
+@media(min-width:600px) {.app-shell {height:min(900px,calc(100svh - 48px)); margin:24px auto; border-radius:38px; border:1px solid #e1e2d8; box-shadow:0 20px 80px #283c2310;} .app-shell.is-today {border-color:#252a34;box-shadow:0 20px 80px #0009;}}
 @media(max-height:680px) {.brand {top:28px;} .main-stage {top:85px;bottom:130px;} .orb-position {width:78%;top:34%;} .record-position {bottom:0;} .record-button {width:62px;height:62px;} .bottom-nav {bottom:30px;height:60px;}}
 @media(prefers-reduced-motion:reduce) {*,*::before {animation:none!important;transition:none!important;} .main-stage,.main-stage.tab-book {transform:none!important;}}
 

@@ -107,7 +107,7 @@ export default function App() {
   }, []);
 
     const isRecording = phase === 'recording';
-  return <main className={`app-shell ${tab === 'book' ? 'is-library' : ''}`}>
+  return <main className={`app-shell ${tab === 'today' ? 'is-today' : 'is-library'}`}>
     <header className="brand" aria-label="Life Book"><BookOpen strokeWidth={1.25} aria-hidden="true" /></header>
     <section className={`main-stage ${phase} tab-${tab}`} aria-label={tab === 'today' ? 'Today' : 'Library'}>
       {tab === 'today' ? <div className={`orb-position ${voice ? 'is-speaking' : ''}`}>

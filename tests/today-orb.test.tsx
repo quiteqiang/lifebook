@@ -25,11 +25,15 @@ describe('Today home visual', () => {
     expect(screen.getByRole('button', { name: 'Library' })).toBeTruthy();
   });
 
-  it('switches the app shell to the Library theme on the second tab', () => {
+  it('applies the Today and Library shell theme classes when switching tabs', () => {
     render(<App />);
+    expect(document.querySelector('.app-shell')?.className).toContain('is-today');
     expect(document.querySelector('.main-stage')?.className).toContain('tab-today');
     fireEvent.click(screen.getByRole('button', { name: 'Library' }));
     expect(document.querySelector('.app-shell')?.className).toContain('is-library');
     expect(document.querySelector('.main-stage')?.className).toContain('tab-book');
+    fireEvent.click(screen.getByRole('button', { name: 'Today' }));
+    expect(document.querySelector('.app-shell')?.className).toContain('is-today');
+    expect(document.querySelector('.app-shell')?.className).not.toContain('is-library');
   });
 });
