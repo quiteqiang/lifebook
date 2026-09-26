@@ -430,6 +430,10 @@ button:focus-visible {outline:2px solid #557862; outline-offset:5px;}
 .book-builder-page::before { content:""; position:absolute; inset:0; pointer-events:none; opacity:.18; background-image:radial-gradient(rgba(231,220,193,.24) .55px,transparent .65px); background-size:14px 14px; mask-image:linear-gradient(180deg,rgba(0,0,0,.55),transparent 78%); }
 .book-builder-header, .book-builder-steps, .book-builder-preview, .book-builder-selection, .book-builder-footer { position:relative; z-index:1; }
 .book-builder-header { display:flex; justify-content:space-between; gap:16px; }
+.book-builder-title-group { display:flex; align-items:flex-start; gap:11px; }
+.book-profile-button { display:grid; flex:none; place-items:center; width:34px; height:34px; margin-top:1px; border:1px solid #d4af375c; border-radius:50%; color:#e3c574; background:radial-gradient(circle at 35% 25%,#34323a,#151820 72%); box-shadow:0 0 0 4px #d4af3710,0 5px 12px #0008,inset 0 1px #ffffff18; transition:transform .2s,border-color .2s,background .2s; }
+.book-profile-button:hover { transform:translateY(-2px); border-color:#edcf77; background:radial-gradient(circle at 35% 25%,#464049,#191b24 72%); }
+.book-profile-button:focus-visible { outline:2px solid #d4af37; outline-offset:3px; }
 .book-builder-eyebrow { display:block; color:#d4af37; font-size:8px; letter-spacing:.25em; }
 .book-builder-header h1 { margin:8px 0 0; color:#f4efe7; font:500 27px/1.04 Georgia,serif; letter-spacing:-.035em; }
 .book-builder-header p { max-width:210px; margin:8px 0 0; color:#949ba8; font-size:10px; line-height:1.45; }
@@ -550,3 +554,29 @@ button:focus-visible {outline:2px solid #557862; outline-offset:5px;}
 .book-checkout-pay:hover { background:#e6c664; }
 .book-checkout-notice { margin:10px 0 0; color:#d7ba72; font-size:9px; text-align:center; }
 @media(prefers-reduced-motion:reduce) { .book-checkout-page,.book-checkout-summary { animation:none; transition:none; } }
+
+/* Orders opened from the Book profile button. */
+.book-orders-page { position:relative; min-height:100%; overflow:hidden; padding:28px 18px 132px; background:radial-gradient(circle at 15% 15%,rgba(149,111,52,.16),transparent 30%),linear-gradient(180deg,#080b12 0%,#0c111b 56%,#080a10 100%); }
+.book-orders-page::before { content:""; position:absolute; inset:0; pointer-events:none; opacity:.16; background-image:radial-gradient(rgba(231,220,193,.24) .55px,transparent .65px); background-size:14px 14px; mask-image:linear-gradient(180deg,rgba(0,0,0,.55),transparent 78%); }
+.book-orders-header, .book-orders-intro, .book-orders-card, .book-orders-empty-note { position:relative; z-index:1; }
+.book-orders-header { display:flex; align-items:center; justify-content:space-between; color:#d4af37; font-size:8px; letter-spacing:.22em; }
+.book-orders-header button { display:flex; align-items:center; gap:5px; padding:7px 9px; border:1px solid #ffffff18; border-radius:16px; color:#d8d5ce; background:#ffffff07; font-size:10px; letter-spacing:.02em; }
+.book-orders-intro { margin:31px 0 24px; }
+.book-orders-intro > span { color:#d4af37; font-size:8px; letter-spacing:.2em; }
+.book-orders-intro h1 { margin:8px 0 0; color:#f4efe7; font:500 29px/1.04 Georgia,serif; letter-spacing:-.035em; }
+.book-orders-intro p { margin:8px 0 0; color:#949ba8; font-size:10px; }
+.book-orders-card { padding:16px; border:1px solid #d4af3744; border-radius:12px; background:linear-gradient(140deg,#d4af3712,#ffffff07); box-shadow:inset 0 1px #ffffff12,0 16px 28px #0006; }
+.book-orders-card-top, .book-orders-card-bottom { display:flex; align-items:center; justify-content:space-between; gap:12px; }
+.book-orders-card-top { padding-bottom:13px; border-bottom:1px solid #ffffff12; color:#87909d; font-size:8px; letter-spacing:.15em; }
+.book-orders-card-top b { color:#e0c37b; font-size:7px; font-weight:500; letter-spacing:.12em; }
+.book-orders-card-main { display:flex; align-items:center; gap:14px; padding:17px 0; }
+.book-orders-mini-cover { display:flex; flex:none; width:62px; height:81px; flex-direction:column; justify-content:space-between; padding:9px 7px; border:1px solid #e7cb7a72; border-radius:3px 6px 5px 2px; color:#f5e7c5; background:linear-gradient(145deg,#a37b3f,#3b291f 78%); box-shadow:inset 5px 0 #0002,4px 7px 11px #0007; transform:rotate(-4deg); }
+.book-orders-mini-cover span { font-size:5px; letter-spacing:.13em; }
+.book-orders-mini-cover strong { font:500 12px/1 Georgia,serif; }
+.book-orders-card-main h2 { overflow:hidden; margin:0; color:#f1eee8; font:400 20px/1.05 Georgia,serif; text-overflow:ellipsis; white-space:nowrap; }
+.book-orders-card-main p { margin:7px 0 5px; color:#b8a16a; font-size:9px; }
+.book-orders-card-main small { color:#858d9a; font-size:9px; }
+.book-orders-card-bottom { padding-top:13px; border-top:1px solid #ffffff12; color:#858d9a; font-size:9px; }
+.book-orders-card-bottom button { display:flex; align-items:center; gap:5px; padding:7px 9px; border:1px solid #d4af3758; border-radius:5px; color:#e6c984; background:#d4af3710; font-size:8px; }
+.book-orders-empty-note { display:flex; align-items:center; justify-content:center; gap:7px; margin-top:27px; color:#777f8c; font-size:9px; }
+.book-orders-empty-note svg { color:#d4af37; }

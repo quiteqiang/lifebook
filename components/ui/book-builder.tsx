@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { ArrowLeft, ArrowRight, BookOpen, Check, Play, Sparkles, Square, X } from 'lucide-react';
+import { ArrowLeft, ArrowRight, BookOpen, Check, Play, Sparkles, Square, UserRound, X } from 'lucide-react';
 import type { MemoryEntry } from '@/lib/memories';
 
 type BookBuilderProps = {
@@ -47,10 +47,27 @@ function BookCheckout({ coverTitle, selectedCount, pageCount, onBack }: { coverT
   </div>;
 }
 
+function BookOrders({ coverTitle, selectedCount, pageCount, onBack }: { coverTitle: string; selectedCount: number; pageCount: number; onBack: () => void }) {
+  return <div className="book-orders-page" aria-label="Your orders">
+    <header className="book-orders-header">
+      <button type="button" aria-label="Back to Book" onClick={onBack}><ArrowLeft size={15} /><span>Book</span></button>
+      <span>YOUR ORDERS</span>
+    </header>
+    <div className="book-orders-intro"><span>VOICE BOOKS</span><h1>Your orders.</h1><p>Keep track of the books you are making.</p></div>
+    <section className="book-orders-card" aria-label="Current book order">
+      <div className="book-orders-card-top"><span>BOOK DRAFT</span><b>IN PROGRESS</b></div>
+      <div className="book-orders-card-main"><div className="book-orders-mini-cover" aria-hidden="true"><span>VOICE<br />BOOK</span><strong>{coverTitle}</strong></div><div><h2>{coverTitle}</h2><p>{selectedCount} memories · {pageCount} pages</p><small>Linen-bound keepsake</small></div></div>
+      <div className="book-orders-card-bottom"><span>Not submitted yet</span><button type="button" onClick={onBack}>Continue editing <ArrowRight size={13} /></button></div>
+    </section>
+    <div className="book-orders-empty-note"><UserRound size={17} /><span>Your completed orders will appear here.</span></div>
+  </div>;
+}
+
 export function BookBuilder({ memories, playingId, onPlay }: BookBuilderProps) {
   const [selectedIds, setSelectedIds] = useState<string[]>(() => memories.slice(0, 3).map(memory => memory.id));
   const [orderOpen, setOrderOpen] = useState(false);
   const [checkoutOpen, setCheckoutOpen] = useState(false);
+  const [ordersOpen, setOrdersOpen] = useState(false);
 
   const selectedMemories = useMemo(() => selectedIds
     .map(id => memories.find(memory => memory.id === id))
@@ -59,6 +76,7 @@ export function BookBuilder({ memories, playingId, onPlay }: BookBuilderProps) {
   const coverTitle = selectedMemories[0] ? memoryTitle(selectedMemories[0], memories.indexOf(selectedMemories[0])) : 'Your Voice';
 
   if (checkoutOpen) return <BookCheckout coverTitle={coverTitle} selectedCount={selectedMemories.length} pageCount={pageCount} onBack={() => setCheckoutOpen(false)} />;
+  if (ordersOpen) return <BookOrders coverTitle={coverTitle} selectedCount={selectedMemories.length} pageCount={pageCount} onBack={() => setOrdersOpen(false)} />;
 
   const toggleSelection = (id: string) => {
     setSelectedIds(current => current.includes(id)
@@ -68,9 +86,12 @@ export function BookBuilder({ memories, playingId, onPlay }: BookBuilderProps) {
 
   return <div className="book-builder-page" aria-label="Make your book">
     <header className="book-builder-header">
-      <div>
+      <div className="book-builder-title-group">
+        <button type="button" className="book-profile-button" aria-label="Open your orders" onClick={() => setOrdersOpen(true)}><UserRound size={17} strokeWidth={1.4} /></button>
+        <div>
         <span className="book-builder-eyebrow">BOOK</span>
         <h1>Your voice, in print.</h1>
+        </div>
       </div>
       <span className="book-builder-voice-count">{memories.length} VOICES</span>
     </header>
