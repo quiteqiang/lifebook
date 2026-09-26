@@ -46,11 +46,11 @@ export function BookBuilder({ memories, playingId, onPlay }: BookBuilderProps) {
     </header>
 
     <div className="book-builder-steps" aria-label="Book order steps">
-      <span className="is-current"><b>01</b> SELECT</span>
+      <span className="is-current"><b>01</b><em>SELECT</em></span>
       <i aria-hidden="true" />
-      <span><b>02</b> PREVIEW</span>
+      <span><b>02</b><em>PREVIEW</em></span>
       <i aria-hidden="true" />
-      <span><b>03</b> ORDER</span>
+      <span><b>03</b><em>ORDER</em></span>
     </div>
 
     <section className="book-builder-preview" aria-label="Book preview">
