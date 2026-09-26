@@ -1,10 +1,16 @@
 import { describe, expect, it } from 'vitest';
-import { advanceOrbMotion } from '@/components/ui/voice-powered-orb';
+import { advanceOrbMotion, orbFrameDelta } from '@/components/ui/voice-powered-orb';
 
 const initial = { level: 0, time: 0, rotation: 0 };
 const options = { maxRotationSpeed: 1.2, maxHoverIntensity: 0.8 };
 
 describe('voice orb motion', () => {
+  it('uses elapsed time at low frame rates but bounds a long resume gap', () => {
+    expect(orbFrameDelta(0, 100)).toBe(0);
+    expect(orbFrameDelta(100, 300)).toBeCloseTo(0.2);
+    expect(orbFrameDelta(300, 2300)).toBeCloseTo(0.05);
+  });
+
   it('drifts gently while silent and eases into and out of speaking motion', () => {
     const idle = advanceOrbMotion(initial, 0, 0.12, false, options);
     const speaking = advanceOrbMotion(idle, 1, 0.12, false, options);

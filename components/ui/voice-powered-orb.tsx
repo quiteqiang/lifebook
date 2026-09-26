@@ -20,6 +20,12 @@ interface VoicePoweredOrbProps {
 interface OrbMotionState { level: number; time: number; rotation: number }
 interface OrbMotionOptions { maxRotationSpeed: number; maxHoverIntensity: number }
 
+export function orbFrameDelta(lastTime: number, now: number) {
+  if (!lastTime) return 0;
+  const elapsed = Math.max((now - lastTime) / 1000, 0);
+  return elapsed > 0.25 ? 0.05 : elapsed;
+}
+
 export function advanceOrbMotion(
   previous: OrbMotionState, rawLevel: number, dt: number, reducedMotion: boolean, options: OrbMotionOptions,
 ) {
@@ -123,7 +129,7 @@ export function VoicePoweredOrb({className, hue = 0, enableVoiceControl = true,
     let motion: OrbMotionState = {level: 0, time: 0, rotation: 0};
     const update = (now: number) => {
       frame = requestAnimationFrame(update);
-      const dt = lastTime ? Math.min((now - lastTime) / 1000, 0.05) : 0;
+      const dt = orbFrameDelta(lastTime, now);
       lastTime = now;
       if (document.hidden) return;
       const settings = options.current;

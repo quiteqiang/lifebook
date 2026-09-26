@@ -26,3 +26,10 @@
 
 - Live microphone audio and the visual speaking transition still need a device-backed manual check. The browser preview inspection covered idle motion only.
 - Vitest prints a Node experimental `localStorage` warning in an existing Today test; all tests pass.
+
+## Low-frame-rate timing correction
+
+- Review found that the original 50 ms cap applied to every frame. At a sustained 5 FPS, the Orb advanced only 50 ms for each 200 ms frame, making its motion four times slower.
+- `orbFrameDelta` now uses the actual elapsed time through 250 ms and applies a 50 ms recovery step only after a longer gap. The render loop still updates `lastTime` before returning for a hidden tab, so hidden-tab behavior is preserved. Exponential level easing and integrated rotation/time continue to use the resulting frame duration.
+- A focused test was written first and failed because `orbFrameDelta` did not exist. It covers a 200 ms frame and a 2-second resume gap.
+- Verification after the correction: focused Orb tests — 3 files, 12 tests passed; `npm test` — 11 files, 43 tests passed; `npm run build` — passed, 1,653 modules transformed; `git diff --check` — passed.
