@@ -1,5 +1,5 @@
-import { useMemo, useState } from 'react';
-import { ArrowRight, BookOpen, Check, Play, Sparkles, Square, X } from 'lucide-react';
+import { useEffect, useMemo, useState } from 'react';
+import { ArrowLeft, ArrowRight, BookOpen, Check, Play, Sparkles, Square, X } from 'lucide-react';
 import type { MemoryEntry } from '@/lib/memories';
 
 type BookBuilderProps = {
@@ -20,15 +20,45 @@ function durationLabel(durationMs: number) {
   return `${minutes}:${String(seconds % 60).padStart(2, '0')}`;
 }
 
+function BookCheckout({ coverTitle, selectedCount, pageCount, onBack }: { coverTitle: string; selectedCount: number; pageCount: number; onBack: () => void }) {
+  const [notice, setNotice] = useState('');
+  useEffect(() => {
+    document.querySelector<HTMLElement>('.book-scene')?.scrollTo({ top: 0, behavior: 'auto' });
+  }, []);
+  return <div className="book-checkout-page" aria-label="Checkout">
+    <header className="book-checkout-header">
+      <button type="button" aria-label="Back to Book" onClick={onBack}><ArrowLeft size={15} /><span>Book</span></button>
+      <span>CHECKOUT</span>
+    </header>
+    <div className="book-checkout-progress" aria-label="Checkout progress"><span className="is-done">01</span><i /><span className="is-done">02</span><i /><span className="is-current">03</span></div>
+    <div className="book-checkout-intro"><span>YOUR BOOK IS READY</span><h1>Make it yours.</h1><p>Review the details before sending it to print.</p></div>
+    <section className="book-checkout-summary" aria-label="Book summary">
+      <div className="book-checkout-mini-book" aria-hidden="true"><div><span>VOICE BOOK</span><strong>{coverTitle}</strong><small>{selectedCount} MOMENTS</small></div><i /></div>
+      <div className="book-checkout-summary-copy"><span>VOICE BOOK · LINEN</span><h2>{coverTitle}</h2><p>A quiet volume made from your selected voice memories.</p><div><b>{selectedCount}</b><small> memories</small><b>{pageCount}</b><small> pages</small></div></div>
+    </section>
+    <section className="book-checkout-details" aria-label="Order details">
+      <div><span>EDITION</span><strong>Linen-bound keepsake</strong></div>
+      <div><span>QUANTITY</span><strong>1 copy</strong></div>
+      <div><span>DELIVERY</span><strong>Set at payment</strong></div>
+    </section>
+    <div className="book-checkout-total"><span>Estimated total</span><strong>A$48</strong></div>
+    <button type="button" className="book-checkout-pay" onClick={() => setNotice('Checkout is ready for payment integration.')}>Continue to payment <ArrowRight size={15} /></button>
+    {notice && <p className="book-checkout-notice" role="status">{notice}</p>}
+  </div>;
+}
+
 export function BookBuilder({ memories, playingId, onPlay }: BookBuilderProps) {
   const [selectedIds, setSelectedIds] = useState<string[]>(() => memories.slice(0, 3).map(memory => memory.id));
   const [orderOpen, setOrderOpen] = useState(false);
+  const [checkoutOpen, setCheckoutOpen] = useState(false);
 
   const selectedMemories = useMemo(() => selectedIds
     .map(id => memories.find(memory => memory.id === id))
     .filter((memory): memory is MemoryEntry => Boolean(memory)), [memories, selectedIds]);
   const pageCount = Math.max(8, Math.ceil(selectedMemories.length * 3.5));
   const coverTitle = selectedMemories[0] ? memoryTitle(selectedMemories[0], memories.indexOf(selectedMemories[0])) : 'Your Voice';
+
+  if (checkoutOpen) return <BookCheckout coverTitle={coverTitle} selectedCount={selectedMemories.length} pageCount={pageCount} onBack={() => setCheckoutOpen(false)} />;
 
   const toggleSelection = (id: string) => {
     setSelectedIds(current => current.includes(id)
@@ -100,7 +130,7 @@ export function BookBuilder({ memories, playingId, onPlay }: BookBuilderProps) {
         <button type="button" className="book-order-close" aria-label="Close order summary" onClick={() => setOrderOpen(false)}><X size={17} /></button>
         <h2>Your Voice Book</h2>
         <div className="book-order-summary"><span><b>{selectedMemories.length}</b> memories</span><span><b>{pageCount}</b> pages</span><span><b>Linen</b> cover</span></div>
-        <div className="book-order-actions"><button type="button" onClick={() => setOrderOpen(false)}>Back to edit</button><button type="button" onClick={() => setOrderOpen(false)}>Request this book <ArrowRight size={14} /></button></div>
+        <div className="book-order-actions"><button type="button" onClick={() => setOrderOpen(false)}>Back to edit</button><button type="button" onClick={() => { setOrderOpen(false); setCheckoutOpen(true); }}>Request this book <ArrowRight size={14} /></button></div>
       </div>
     </div>}
   </div>;
