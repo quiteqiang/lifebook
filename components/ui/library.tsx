@@ -200,7 +200,10 @@ export function Library({ onReplay }: LibraryProps) {
           <span className="library-page-edges" aria-hidden="true" />
           <div className="library-page-left"><div><span>ENTRY 09.22</span><h3>The Autumn Equinox</h3><hr /><p>“We sat as shadows stretched over the pavement. The voice note didn't capture just words—it sealed the exact courage of that breath.”</p></div><div className="library-page-meta"><span><BookOpen size={12} /> 48s Audio Captured</span><small>P. 142 · @Sarah</small></div></div>
           <div className="library-page-right"><div><span>AUTO-SCRIBED</span><p>“Life isn't measured by milestones typed out after they are forgotten, but by moments spoken while they are still warm.”</p></div><small>LIFEBOOK PRESS · P. 143</small></div>
-          <button type="button" className={`library-flip-leaf ${flipped ? 'is-flipped' : ''}`} aria-label="Flip page" aria-pressed={flipped} onClick={turnPage}><span>PREVIEW FLIP</span><p>Tap this page to turn in 3D…</p><small>Flip Page →</small></button>
+          <button type="button" className={`library-flip-leaf ${flipped ? 'is-flipped' : ''}`} aria-label={flipped ? 'Flip page back' : 'Flip page'} aria-pressed={flipped} onClick={turnPage}>
+            <span className="library-flip-leaf-front" aria-hidden={flipped}><span>PREVIEW FLIP</span><p>Tap this page to turn in 3D…</p><small>Flip Page →</small></span>
+            <span className="library-flip-leaf-back" aria-hidden={!flipped}><span>RETURN</span><p>Tap this page to turn back…</p><small>← Flip Page Back</small></span>
+          </button>
           <span className="library-book-spine" aria-hidden="true" />
         </div>
       </div>

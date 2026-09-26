@@ -1,5 +1,6 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { cleanup, fireEvent, render, screen } from '@testing-library/react';
+import { readFileSync } from 'node:fs';
 import { Library } from '@/components/ui/library';
 
 afterEach(() => { cleanup(); vi.restoreAllMocks(); vi.unstubAllGlobals(); });
@@ -176,6 +177,22 @@ describe('Library replacement page', () => {
     fireEvent.click(page);
     expect(page.className).not.toContain('is-flipped');
     expect(page.getAttribute('aria-pressed')).toBe('false');
+  });
+
+  it('shows a readable reverse target after the leaf flips', () => {
+    render(<Library />);
+    fireEvent.click(screen.getByRole('button', { name: /July 2026/ }));
+    const leaf = screen.getByRole('button', { name: 'Flip page' });
+
+    fireEvent.click(leaf);
+
+    expect(screen.getByRole('button', { name: 'Flip page back' })).toBe(leaf);
+    expect(leaf.querySelector('.library-flip-leaf-back')?.textContent).toContain('turn back');
+    const stylesheet = readFileSync('styles.css', 'utf8');
+    expect(stylesheet).toContain('.library-flip-leaf-back');
+    expect(stylesheet).toMatch(/\.library-flip-leaf\s*\{[^}]*backface-visibility:visible;/);
+    expect(stylesheet).toMatch(/\.library-flip-leaf-back\s*\{[^}]*transform:rotateY\(180deg\);/);
+    expect(stylesheet).toContain('backface-visibility:hidden');
   });
 
   it('skips the entrance state when reduced motion is requested', () => {
