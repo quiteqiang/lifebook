@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
-import { BookOpen, Home, Mic, Square, X } from 'lucide-react';
+import { BookOpen, Home, X } from 'lucide-react';
 import { VoicePoweredOrb } from '@/components/ui/voice-powered-orb';
-import { Button } from '@/components/ui/button';
+import { AIVoiceInput } from '@/components/ui/ai-voice-input';
 import { Library } from '@/components/ui/library';
 import { readAudio, saveAudio } from '@/lib/audio-store';
 import { createMemoryEntry, type MemoryEntry, readMemoryMetadata, writeMemoryMetadata } from '@/lib/memories';
@@ -106,7 +106,7 @@ export default function App() {
     audioRef.current?.pause();
   }, []);
 
-    const isRecording = phase === 'recording';
+  const isRecording = phase === 'recording';
   return <main className={`app-shell ${tab === 'today' ? 'is-today' : 'is-library'}`}>
     <header className="brand" aria-label="Life Book"><BookOpen strokeWidth={1.25} aria-hidden="true" /></header>
     <section className={`main-stage ${phase} tab-${tab}`} aria-label={tab === 'today' ? 'Today' : 'Library'}>
@@ -116,11 +116,7 @@ export default function App() {
         <Library onReplay={() => { const latest = memories[0]; if (latest) void playMemory(latest.id); else setError(true); }} />
       </div>}
       {tab === 'today' && <div className="record-position">
-        <Button className={`record-button ${isRecording ? 'is-recording' : ''} ${isRecording && !ready ? 'is-pending' : ''}`} size="icon"
-          aria-label={isRecording ? 'Stop voice input' : 'Start voice input'} aria-pressed={isRecording} disabled={phase === 'saving'}
-          onClick={() => isRecording ? endRecording() : beginRecording()}>
-          {isRecording ? <Square fill="currentColor" strokeWidth={0} /> : <Mic strokeWidth={1.7} />}
-        </Button>
+        <AIVoiceInput active={isRecording} ready={ready} disabled={phase === 'saving'} onStart={beginRecording} onStop={endRecording} />
         <span className="sr-only" role="status">{phase === 'saving' ? 'Saving memory.' : isRecording ? ready ? 'Microphone on. Speak to animate the orb.' : 'Waiting for microphone permission.' : 'Microphone off.'}</span>
       </div>}
     </section>
