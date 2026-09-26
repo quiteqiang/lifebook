@@ -32,7 +32,7 @@ describe('Library replacement page', () => {
     fireEvent.click(screen.getByRole('button', { name: /September 2026/ }));
 
     expect(screen.getByRole('dialog', { name: /September 2026/ })).toBeTruthy();
-    expect(screen.getByRole('button', { name: 'Turn 3D Page' })).toBeTruthy();
+    expect(screen.queryByRole('button', { name: /Turn 3D Page/ })).toBeNull();
   });
 
   it('leaves a simple pointer click with its book button and captures a real drag', () => {
@@ -169,16 +169,13 @@ describe('Library replacement page', () => {
     expect(page.className).toContain('is-flipped');
     expect(page.getAttribute('aria-pressed')).toBe('true');
     expect(screen.getByRole('dialog', { name: /July 2026/ })).toBeTruthy();
-    const turnAction = screen.getByRole('button', { name: 'Turn 3D Page back' });
-    expect(turnAction.getAttribute('aria-pressed')).toBe('true');
-    expect(turnAction.textContent).toContain('Turn 3D Page');
+    expect(screen.queryByRole('button', { name: /Turn 3D Page/ })).toBeNull();
 
     fireEvent.click(screen.getByRole('button', { name: 'Replay Voice' }));
     expect(onReplay).toHaveBeenCalledOnce();
-    fireEvent.click(turnAction);
+    fireEvent.click(page);
     expect(page.className).not.toContain('is-flipped');
-    expect(turnAction.getAttribute('aria-pressed')).toBe('false');
-    expect(screen.getByRole('button', { name: 'Turn 3D Page' })).toBe(turnAction);
+    expect(page.getAttribute('aria-pressed')).toBe('false');
   });
 
   it('skips the entrance state when reduced motion is requested', () => {
@@ -189,25 +186,23 @@ describe('Library replacement page', () => {
     expect(screen.getByRole('dialog', { name: /July 2026/ }).classList.contains('is-opening')).toBe(false);
   });
 
-  it('moves focus to the visible page action when the leaf flips away', () => {
+  it('keeps the leaf available and focused in both flip directions', () => {
     vi.stubGlobal('matchMedia', vi.fn().mockReturnValue({ matches: true }));
     render(<Library />);
     fireEvent.click(screen.getByRole('button', { name: /July 2026/ }));
     const leaf = screen.getByRole('button', { name: 'Flip page' });
-    const action = screen.getByRole('button', { name: 'Turn 3D Page' });
-
     leaf.focus();
     fireEvent.click(leaf);
     expect(leaf.classList.contains('is-flipped')).toBe(true);
-    expect(leaf.tabIndex).toBe(-1);
-    expect(leaf.getAttribute('aria-hidden')).toBe('true');
-    expect(document.activeElement).toBe(action);
+    expect(leaf.tabIndex).toBe(0);
+    expect(leaf.getAttribute('aria-hidden')).toBeNull();
+    expect(document.activeElement).toBe(leaf);
 
-    fireEvent.click(action);
+    fireEvent.click(leaf);
     expect(leaf.classList.contains('is-flipped')).toBe(false);
     expect(leaf.tabIndex).toBe(0);
-    expect(leaf.getAttribute('aria-hidden')).toBe('false');
-    expect(document.activeElement).toBe(action);
+    expect(leaf.getAttribute('aria-hidden')).toBeNull();
+    expect(document.activeElement).toBe(leaf);
   });
 
   it('applies coverflow motion and updates the active volume caption while dragging', () => {

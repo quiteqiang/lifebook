@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import type { PointerEvent as ReactPointerEvent } from 'react';
-import { BookOpen, Play, RotateCcw, X } from 'lucide-react';
+import { BookOpen, Play, X } from 'lucide-react';
 
 type Volume = {
   id: number;
@@ -34,7 +34,6 @@ export function Library({ onReplay }: LibraryProps) {
   const [isOpening, setIsOpening] = useState(false);
   const [selectedIndex, setSelectedIndex] = useState(1);
   const frameRef = useRef<HTMLDivElement | null>(null);
-  const turnActionRef = useRef<HTMLButtonElement | null>(null);
   const bookRefs = useRef<(HTMLButtonElement | null)[]>([]);
   const posRef = useRef(1);
   const pitchRef = useRef(108);
@@ -48,7 +47,6 @@ export function Library({ onReplay }: LibraryProps) {
   };
   const closeBook = () => { setOpenVolume(null); setFlipped(false); setIsOpening(false); };
   const turnPage = () => {
-    if (!flipped) turnActionRef.current?.focus();
     setFlipped(value => !value);
   };
   const indexAt = useCallback((position: number) => Math.round(position), []);
@@ -202,11 +200,11 @@ export function Library({ onReplay }: LibraryProps) {
           <span className="library-page-edges" aria-hidden="true" />
           <div className="library-page-left"><div><span>ENTRY 09.22</span><h3>The Autumn Equinox</h3><hr /><p>“We sat as shadows stretched over the pavement. The voice note didn't capture just words—it sealed the exact courage of that breath.”</p></div><div className="library-page-meta"><span><BookOpen size={12} /> 48s Audio Captured</span><small>P. 142 · @Sarah</small></div></div>
           <div className="library-page-right"><div><span>AUTO-SCRIBED</span><p>“Life isn't measured by milestones typed out after they are forgotten, but by moments spoken while they are still warm.”</p></div><small>LIFEBOOK PRESS · P. 143</small></div>
-          <button type="button" className={`library-flip-leaf ${flipped ? 'is-flipped' : ''}`} aria-label="Flip page" aria-pressed={flipped} aria-hidden={flipped} tabIndex={flipped ? -1 : 0} onClick={turnPage}><span>PREVIEW FLIP</span><p>Tap this page to turn in 3D…</p><small>Flip Page →</small></button>
+          <button type="button" className={`library-flip-leaf ${flipped ? 'is-flipped' : ''}`} aria-label="Flip page" aria-pressed={flipped} onClick={turnPage}><span>PREVIEW FLIP</span><p>Tap this page to turn in 3D…</p><small>Flip Page →</small></button>
           <span className="library-book-spine" aria-hidden="true" />
         </div>
       </div>
-      <div className="library-portal-actions"><button ref={turnActionRef} type="button" aria-label={flipped ? 'Turn 3D Page back' : 'Turn 3D Page'} aria-pressed={flipped} onClick={turnPage}><RotateCcw size={14} />Turn 3D Page</button><button type="button" onClick={onReplay}><Play size={14} fill="currentColor" />Replay Voice</button></div>
+      <div className="library-portal-actions"><button type="button" onClick={onReplay}><Play size={14} fill="currentColor" />Replay Voice</button></div>
     </div>}
   </div>;
 }
