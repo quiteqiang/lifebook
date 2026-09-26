@@ -45,7 +45,7 @@ describe('Today home visual', () => {
     expect(screen.getByText('00:00')).toBeTruthy();
     fireEvent.click(screen.getByRole('button', { name: 'Start voice input' }));
     expect(screen.getByRole('button', { name: 'Stop voice input' })).toBeTruthy();
-    expect(screen.getByText('Listening...')).toBeTruthy();
+    expect(screen.getByText('Waiting for microphone...')).toBeTruthy();
     fireEvent.click(screen.getByRole('button', { name: 'Library' }));
     expect(screen.queryByRole('button', { name: /voice input/i })).toBeNull();
     fireEvent.click(screen.getByRole('button', { name: 'Today' }));
@@ -54,6 +54,18 @@ describe('Today home visual', () => {
 });
 
 describe('AI voice input', () => {
+  it('waits for microphone readiness before showing listening time', () => {
+    vi.useFakeTimers();
+    const { rerender } = render(<AIVoiceInput active ready={false} disabled={false} onStart={vi.fn()} onStop={vi.fn()} />);
+    expect(screen.getByText('Waiting for microphone...')).toBeTruthy();
+    act(() => { vi.advanceTimersByTime(2100); });
+    expect(screen.getByText('00:00')).toBeTruthy();
+    rerender(<AIVoiceInput active ready disabled={false} onStart={vi.fn()} onStop={vi.fn()} />);
+    expect(screen.getByText('Listening...')).toBeTruthy();
+    act(() => { vi.advanceTimersByTime(2100); });
+    expect(screen.getByText('00:02')).toBeTruthy();
+  });
+
   it('updates the elapsed timer without repeatedly requesting a stop', () => {
     vi.useFakeTimers();
     const onStart = vi.fn();

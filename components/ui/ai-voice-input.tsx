@@ -16,7 +16,7 @@ export function AIVoiceInput({ active, ready, disabled, onStart, onStop }: AIVoi
   const [elapsedSeconds, setElapsedSeconds] = useState(0);
 
   useEffect(() => {
-    if (!active) {
+    if (!active || !ready) {
       setElapsedSeconds(0);
       return;
     }
@@ -27,12 +27,12 @@ export function AIVoiceInput({ active, ready, disabled, onStart, onStop }: AIVoi
       setElapsedSeconds(Math.floor((Date.now() - startedAt) / 1000));
     }, 250);
     return () => window.clearInterval(timer);
-  }, [active]);
+  }, [active, ready]);
 
   const minutes = String(Math.floor(elapsedSeconds / 60)).padStart(2, '0');
   const seconds = String(elapsedSeconds % 60).padStart(2, '0');
 
-  return <div className={cn('ai-voice-input', active && 'is-active', active && !ready && 'is-pending')}>
+  return <div className={cn('ai-voice-input', active && 'is-active', active && !ready && 'is-pending', active && ready && 'is-listening')}>
     <button
       type="button"
       className="ai-voice-button"
@@ -47,6 +47,6 @@ export function AIVoiceInput({ active, ready, disabled, onStart, onStop }: AIVoi
     <span className="ai-voice-visualizer" aria-hidden="true">
       {barHeights.map((height, index) => <span key={index} style={{ height, animationDelay: `${index * -0.12}s` }} />)}
     </span>
-    <span className="ai-voice-caption">{active ? 'Listening...' : 'Click to speak'}</span>
+    <span className="ai-voice-caption">{active ? ready ? 'Listening...' : 'Waiting for microphone...' : 'Click to speak'}</span>
   </div>;
 }
