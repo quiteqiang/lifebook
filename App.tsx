@@ -1,14 +1,11 @@
 import { useEffect, useRef, useState } from 'react';
-import { ArrowLeft, BookMarked, BookOpen, Home, X } from 'lucide-react';
+import { BookMarked, BookOpen, Home, X } from 'lucide-react';
 import { VoicePoweredOrb } from '@/components/ui/voice-powered-orb';
 import { AIVoiceInput } from '@/components/ui/ai-voice-input';
 import { Library } from '@/components/ui/library';
-import { VoiceCollection } from '@/components/ui/voice-collection';
-import { VoiceMixStudio } from '@/components/ui/voice-mix-studio';
+import { BookBuilder } from '@/components/ui/book-builder';
 import { readAudio, saveAudio } from '@/lib/audio-store';
-import { concatenateAudioBlobs } from '@/lib/audio-mix';
 import { createMemoryEntry, type MemoryEntry, readMemoryMetadata, writeMemoryMetadata } from '@/lib/memories';
-import { getMixRecipe, type MixRecipeId } from '@/lib/mix-recipes';
 
 type Phase = 'idle' | 'recording' | 'saving';
 
@@ -19,14 +16,12 @@ function initialMemories(): MemoryEntry[] {
 
 export default function App() {
   const [tab, setTab] = useState<'today' | 'library' | 'book'>('today');
-  const [bookView, setBookView] = useState<'collection' | 'mixer'>('collection');
   const [phase, setPhase] = useState<Phase>('idle');
   const [ready, setReady] = useState(false);
   const [voice, setVoice] = useState(false);
   const [error, setError] = useState(false);
   const [memories, setMemories] = useState<MemoryEntry[]>(initialMemories);
   const [playingId, setPlayingId] = useState<string | null>(null);
-  const [mixing, setMixing] = useState(false);
   const recorderRef = useRef<MediaRecorder | null>(null);
   const chunksRef = useRef<Blob[]>([]);
   const startedAtRef = useRef(0);
@@ -106,32 +101,6 @@ export default function App() {
     void audio.play().catch(() => { setPlayingId(null); setError(true); });
   };
 
-  const mixMemories = async (sourceIds: string[], recipeId: MixRecipeId): Promise<boolean> => {
-    if (sourceIds.length !== 2 || sourceIds[0] === sourceIds[1]) return false;
-    setMixing(true);
-    try {
-      const sourceEntries = sourceIds.map(id => memories.find(memory => memory.id === id));
-      const sourceBlobs = await Promise.all(sourceIds.map(id => readAudio(id)));
-      if (sourceEntries.some(entry => !entry) || sourceBlobs.some(blob => !blob)) throw new Error('Source audio unavailable.');
-      const mixedBlob = await concatenateAudioBlobs(sourceBlobs as Blob[]);
-      const entry = createMemoryEntry(mixedBlob, sourceEntries.reduce((total, source) => total + (source?.durationMs ?? 0), 0), sourceEntries.flatMap(source => source?.waveform ?? []));
-      const recipe = getMixRecipe(recipeId);
-      entry.title = recipe.label;
-      entry.mixKind = recipe.id;
-      entry.sourceIds = sourceIds;
-      const next = [entry, ...memories].slice(0, 24);
-      await saveAudio(entry, mixedBlob);
-      if (typeof window !== 'undefined') writeMemoryMetadata(window.localStorage, next);
-      setMemories(next);
-      return true;
-    } catch {
-      setError(true);
-      return false;
-    } finally {
-      setMixing(false);
-    }
-  };
-
   useEffect(() => () => {
     if (finishTimerRef.current) window.clearTimeout(finishTimerRef.current);
     recorderRef.current?.stop();
@@ -147,10 +116,7 @@ export default function App() {
       </div> : tab === 'library' ? <div className="mybook-roll-scene library-scene">
         <Library onReplay={() => { const latest = memories[0]; if (latest) void playMemory(latest.id); else setError(true); }} />
       </div> : <div className="mybook-roll-scene book-scene">
-        {bookView === 'collection' ? <VoiceCollection memories={memories} playingId={playingId} onPlay={playMemory} onOpenMixer={() => setBookView('mixer')} /> : <div className="mybook-mixer-page">
-          <button type="button" className="mixer-back" aria-label="Back to collection" onClick={() => setBookView('collection')}><ArrowLeft size={16} /><span>声音收藏</span></button>
-          <VoiceMixStudio memories={memories} playingId={playingId} mixing={mixing} onPlay={playMemory} onMix={mixMemories} />
-        </div>}
+        <BookBuilder memories={memories} playingId={playingId} onPlay={playMemory} />
       </div>}
       {tab === 'today' && <div className="record-position">
         <AIVoiceInput active={isRecording} ready={ready} disabled={phase === 'saving'} onStart={beginRecording} onStop={endRecording} />
@@ -161,7 +127,7 @@ export default function App() {
     <nav className="bottom-nav" aria-label="Main navigation">
       <button aria-current={tab === 'today' ? 'page' : undefined} onClick={() => setTab('today')}><Home strokeWidth={1.7}/><span>Today</span></button>
       <button aria-current={tab === 'library' ? 'page' : undefined} onClick={() => { if (isRecording) endRecording(); setError(false); setTab('library'); }}><BookOpen strokeWidth={1.5}/><span>Library</span></button>
-      <button aria-current={tab === 'book' ? 'page' : undefined} onClick={() => { if (isRecording) endRecording(); setError(false); setBookView('collection'); setTab('book'); }}><BookMarked strokeWidth={1.55}/><span>Book</span></button>
+      <button aria-current={tab === 'book' ? 'page' : undefined} onClick={() => { if (isRecording) endRecording(); setError(false); setTab('book'); }}><BookMarked strokeWidth={1.55}/><span>Book</span></button>
     </nav>
     <div className="home-indicator" aria-hidden="true" />
   </main>;
