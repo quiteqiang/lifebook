@@ -1,0 +1,36 @@
+node_modules/
+dist/
+.superpowers/
+*.tsbuildinfo
+.DS_Store
+
+# Env files
+.env
+.env.*
+!.env.example
+
+# Editor
+.vscode/*
+!.vscode/extensions.json
+.idea/
+
+# Test coverage
+coverage/
+
+# Logs
+*.log
+npm-debug.log*
+deploy_log
+
+# 部署脚本：包含服务器 IP / SSH 登录信息，不要提交
+deploy.sh
+
+# Claude Code 本地权限设置
+.claude/
+
+# Python 后端
+__pycache__/
+*.pyc
+*.pyo
+server/.venv/
+.venv/
