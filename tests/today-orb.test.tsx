@@ -32,7 +32,7 @@ describe('Today home visual', () => {
     expect(document.querySelector('.main-stage')?.className).toContain('tab-today');
     fireEvent.click(screen.getByRole('button', { name: 'Library' }));
     expect(document.querySelector('.app-shell')?.className).toContain('is-library');
-    expect(document.querySelector('.main-stage')?.className).toContain('tab-book');
+    expect(document.querySelector('.main-stage')?.className).toContain('tab-library');
     fireEvent.click(screen.getByRole('button', { name: 'Today' }));
     expect(document.querySelector('.app-shell')?.className).toContain('is-today');
     expect(document.querySelector('.app-shell')?.className).not.toContain('is-library');
